@@ -1,0 +1,16 @@
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.env
+.env.*
+!.env.example
+.npm-cache/
+api/.env
+web/.env.local
+coverage/
+client_secret_*.apps.googleusercontent.com.json
+*.log
+*.tsbuildinfo
+*-firebase-adminsdk-*.json
+*service-account*.json
