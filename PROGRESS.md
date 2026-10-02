@@ -17,8 +17,10 @@ Updated: 2026-10-01
 - API access checks covered administrator, assigned warehouse staff, same-team warehouse lead, finance restrictions, and cross-team warehouse isolation. Warehouse lookup responses excluded customer and payment fields.
 - Browser workflow covered scanning an order, receiving stock for a buy order, picking and dispatching a transport order, and confirming inventory and shipment status changes.
 - The isolated QA containers, volumes, network, and temporary files were removed after verification. The developer’s regular Compose environment was not changed.
+- Completed a role-by-role browser review: admin staff access; operations customer and order creation, ledger, and logistics; team-lead read-only access to teammate records; assigned and team warehouse tasks; finance ledger visibility; and empty cross-team views for a South-team user.
+- Checked the finance page at a 390 px viewport. The page had no document-level horizontal overflow and its wide ledger table remained horizontally scrollable.
 
 ## Handoff and remaining work
 
-- The full visual and use-case review across every application role is not yet complete; continue it on the next machine.
+- The listed workflows and role views are reviewed. Continue with the next business requirement or visual change requested by the user.
 - Local credentials are intentionally excluded from Git. On the new machine, copy `.env.example` to `.env`, configure the required auth and database values, then start the app with `docker compose up --build`.

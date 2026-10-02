@@ -5,16 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Customer } from './entities/customer.entity';
+import { DeliveryUpdate } from './entities/delivery-update.entity';
 import { LedgerEntry } from './entities/ledger-entry.entity';
 import { Order } from './entities/order.entity';
 import { Staff } from './entities/staff.entity';
-import { DeliveryUpdate } from './entities/delivery-update.entity';
-import { InventoryItem } from './entities/inventory-item.entity';
-import { InventoryStock } from './entities/inventory-stock.entity';
-import { SessionGuard } from './session.guard';
 import { Team } from './entities/team.entity';
-import { WarehouseLocation } from './entities/warehouse-location.entity';
-import { WarehouseMovement } from './entities/warehouse-movement.entity';
+import { getDatabaseOptions } from './database.config';
+import { SessionGuard } from './session.guard';
 
 const authMode = process.env.AUTH_MODE ?? 'dev';
 const nodeEnv = process.env.NODE_ENV;
@@ -34,12 +31,7 @@ if (authMode !== 'dev' && (!configuredJwtSecret || configuredJwtSecret.length < 
     ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({ secret: configuredJwtSecret || devJwtSecret, signOptions: { expiresIn: '12h' } }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      entities: [Customer, Order, LedgerEntry, Staff, DeliveryUpdate, Team, WarehouseLocation, InventoryItem, InventoryStock, WarehouseMovement],
-      synchronize: nodeEnv === 'development',
-      migrations: [__dirname + '/migrations/*{.js,.ts}'],
-      migrationsRun: nodeEnv !== 'development',
+      ...getDatabaseOptions(),
       retryAttempts: 20,
       retryDelay: 2000,
     }),

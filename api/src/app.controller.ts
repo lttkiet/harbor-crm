@@ -3,6 +3,8 @@ import { ArrayMinSize, IsArray, IsBoolean, IsDateString, IsEmail, IsIn, IsInt, I
 import { Transform, Type } from 'class-transformer';
 import { AppService } from './app.service';
 import { SessionGuard } from './session.guard';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 const trimOptional = ({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() || null : value;
 const trimRequired = ({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value;
@@ -121,7 +123,10 @@ class TemporaryPasswordInput {
 
 @Controller()
 export class AppController {
-  constructor(private readonly service: AppService) {}
+  constructor(
+    private readonly service: AppService,
+    @InjectDataSource() private readonly dataSource: DataSource,
+  ) {}
 
   @Post('auth/session')
   @HttpCode(200)
@@ -141,6 +146,12 @@ export class AppController {
 
   @Get('health')
   health() { return { status: 'ok' }; }
+
+  @Get('ready')
+  async ready() {
+    await this.dataSource.query('SELECT 1');
+    return { status: 'ready' };
+  }
 
   @UseGuards(SessionGuard)
   @Get('dashboard')

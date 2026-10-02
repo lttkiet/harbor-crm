@@ -2,6 +2,12 @@
   "name": "crm-operations",
   "private": true,
   "workspaces": ["api", "web"],
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.5",
+    "@google-cloud/storage": {
+      "gaxios": "6.3.0"
+    }
+  },
   "scripts": {
     "dev": "docker compose up --build",
     "dev:down": "docker compose down",

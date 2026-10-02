@@ -1,6 +1,8 @@
 # Harbor CRM
 
-Internal customer, sourcing, transport, and payment operations app. Every customer belongs to the staff member who created it. Orders and ledger entries inherit that customer’s access scope.
+Internal customer, sourcing, transport, and payment operations app. In authenticated staff workflows, a customer belongs to the staff member who created it. Local demo-created customers appear as Administrator-owned. Orders and ledger entries inherit the customer’s access scope.
+
+See [PRODUCT.md](PRODUCT.md) for the product and UX specification: roles, screens, visual design, fields, validation, workflows, business rules, API capabilities, operational requirements, and open decisions.
 
 ## Core records
 
@@ -52,6 +54,10 @@ The Warehouse workspace manages shared inventory across named locations. Order n
 
 - `web`: React, TypeScript, Redux Toolkit with persisted preferences, Ant Design, Bootstrap, and Firebase client auth.
 - `api`: NestJS REST API with JWT sessions, Firebase Admin token verification, TypeORM, and PostgreSQL.
-- `docker-compose.yml`: local app and database services.
+- `docker-compose.yml`: local app and database services, using the development Dockerfiles.
 
-Production starts the TypeORM migrations automatically with schema synchronization disabled. Set `AUTH_MODE=firebase` or `AUTH_MODE=local`, configure a unique strong `JWT_SECRET`, HTTPS termination, and a database backup policy. Do not publish the development Compose ports to the internet.
+## Production deployment
+
+Production containers use separate multi-stage Dockerfiles: the API builds NestJS and runs as the unprivileged Node user; the web image serves the compiled SPA through unprivileged NGINX. The API requires `NODE_ENV=production`, an explicit HTTPS `WEB_ORIGIN`, a non-demo auth mode, a strong `JWT_SECRET`, and either `DATABASE_URL` or Cloud SQL connection settings. Database migrations run explicitly through `node dist/run-migrations.js` before API rollout; production replicas do not run migrations during startup.
+
+For Cloud Run deployment, image builds, Cloud SQL, service accounts, secrets, migrations, probes, and rollout steps, see [deploy/gcp/README.md](deploy/gcp/README.md). Use Firebase authentication for public production access, store server credentials in Secret Manager, and configure Cloud SQL backups and recovery before onboarding staff. Do not publish the development Compose ports to the internet.

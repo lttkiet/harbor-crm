@@ -19,6 +19,7 @@ services:
   api:
     build:
       context: ./api
+      dockerfile: Dockerfile.dev
     restart: unless-stopped
     environment:
       NODE_ENV: development
@@ -50,6 +51,7 @@ services:
   web:
     build:
       context: ./web
+      dockerfile: Dockerfile.dev
     restart: unless-stopped
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
