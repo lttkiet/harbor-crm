@@ -1,0 +1,4 @@
+## 2025-02-28 - [LIKE Injection in TypeORM Queries]
+**Vulnerability:** Found a LIKE injection vulnerability (which poses a DoS risk via wildcard injection) in the `listCustomers` and `listOrders` methods in `api/src/app.service.ts`, where user-supplied search input was interpolated directly into `ILIKE` parameter strings (`%${search}%`).
+**Learning:** Even when using TypeORM's parameterized queries (which prevents classical SQL injection), using user input inside wildcard searches without escaping allows attackers to send `%%%%%` or `_____` sequences. This forces PostgreSQL to perform heavy regex-like matching on the entire table, leading to potential Denial of Service.
+**Prevention:** Always sanitize input passed to `LIKE` or `ILIKE` clauses by escaping `%`, `_`, and `\` using `search.replace(/([%_\\])/g, '\\$1')`.

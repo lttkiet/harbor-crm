@@ -174,7 +174,10 @@ export class AppService implements OnModuleInit {
     const owners = await this.visibleOwnerIds(user);
     const query = this.customers.createQueryBuilder('customer').leftJoin('customer.ownerStaff', 'ownerStaff').addSelect(['ownerStaff.id', 'ownerStaff.email']).orderBy('customer.createdAt', 'DESC');
     if (owners) query.where('customer.ownerStaffId IN (:...owners)', { owners });
-    if (search) query.andWhere('(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)', { search: `%${search}%` });
+    if (search) {
+      const escapedSearch = search.replace(/([%_\\])/g, '\\$1');
+      query.andWhere('(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)', { search: `%${escapedSearch}%` });
+    }
     return query.getMany();
   }
 
@@ -200,7 +203,10 @@ export class AppService implements OnModuleInit {
     if (owners) query.andWhere('customer.ownerStaffId IN (:...owners)', { owners });
     if (filters.type) query.andWhere('order.type = :type', { type: filters.type });
     if (filters.status) query.andWhere('order.status = :status', { status: filters.status });
-    if (filters.search) query.andWhere('(order.orderNumber ILIKE :search OR customer.name ILIKE :search)', { search: `%${filters.search}%` });
+    if (filters.search) {
+      const escapedSearch = filters.search.replace(/([%_\\])/g, '\\$1');
+      query.andWhere('(order.orderNumber ILIKE :search OR customer.name ILIKE :search)', { search: `%${escapedSearch}%` });
+    }
     return this.withBilledTotals(await query.getMany());
   }
 
