@@ -33,6 +33,8 @@ To allow other devices on the LAN to connect, set `APP_BIND_ADDRESS=0.0.0.0`. Se
 
 Stop the app with `docker compose down`. To also remove the local database, run `docker compose down -v`.
 
+Run the repository checks from the root with `npm ci`, `npm run lint`, and `npm test`. The unit tests do not require Docker or a database.
+
 ## Firebase sign-in
 
 To use Firebase Authentication instead of the local demo session:

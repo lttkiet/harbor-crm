@@ -1,7 +1,10 @@
 {
   "name": "crm-operations",
   "private": true,
-  "workspaces": ["api", "web"],
+  "workspaces": [
+    "api",
+    "web"
+  ],
   "overrides": {
     "@grpc/grpc-js": "^1.14.5",
     "@google-cloud/storage": {
@@ -11,6 +14,15 @@
   "scripts": {
     "dev": "docker compose up --build",
     "dev:down": "docker compose down",
-    "dev:logs": "docker compose logs -f api web"
+    "dev:logs": "docker compose logs -f api web",
+    "lint": "eslint \"api/src/**/*.ts\" \"api/test/**/*.ts\" \"web/src/**/*.{ts,tsx}\"",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jsdom": "^30.1.2",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3"
   }
 }

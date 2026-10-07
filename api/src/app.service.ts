@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { compare, hash } from 'bcryptjs';
-import { ILike, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Customer } from './entities/customer.entity';
 import { DeliveryUpdate } from './entities/delivery-update.entity';
 import { LedgerEntry } from './entities/ledger-entry.entity';
@@ -507,7 +507,8 @@ export class AppService implements OnModuleInit {
         order.warehouseStaffId = assignee.id;
       }
     }
-    const { warehouseStaffId: _warehouseStaffId, ...deliveryInput } = input;
+    const deliveryInput = { ...input };
+    delete deliveryInput.warehouseStaffId;
     return this.orders.manager.transaction(async (manager) => {
       const currentOrder = await manager.getRepository(Order).findOneBy({ id });
       if (!currentOrder) throw new NotFoundException('Order not found');
