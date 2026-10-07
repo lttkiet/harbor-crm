@@ -10,18 +10,7 @@ import { Team } from './entities/team.entity';
 import { WarehouseLocation } from './entities/warehouse-location.entity';
 import { WarehouseMovement } from './entities/warehouse-movement.entity';
 
-const entities = [
-  Customer,
-  Order,
-  LedgerEntry,
-  Staff,
-  DeliveryUpdate,
-  Team,
-  WarehouseLocation,
-  InventoryItem,
-  InventoryStock,
-  WarehouseMovement,
-];
+const entities = [Customer, Order, LedgerEntry, Staff, DeliveryUpdate, Team, WarehouseLocation, InventoryItem, InventoryStock, WarehouseMovement];
 
 export function getDatabaseOptions(env: NodeJS.ProcessEnv = process.env): DataSourceOptions {
   const cloudSqlInstance = env.CLOUD_SQL_INSTANCE?.trim();

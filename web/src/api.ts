@@ -1,8 +1,26 @@
-import type { Customer, DeliveryUpdate, FinanceOrder, InventoryItem, InventoryStock, LedgerEntry, Order, OrderDetail, Session, Staff, Team, WarehouseLocation, WarehouseLookup, WarehouseMovement, WarehouseTask } from './types';
+import type {
+  Customer,
+  DeliveryUpdate,
+  FinanceOrder,
+  InventoryItem,
+  InventoryStock,
+  LedgerEntry,
+  Order,
+  OrderDetail,
+  Session,
+  Staff,
+  Team,
+  WarehouseLocation,
+  WarehouseLookup,
+  WarehouseMovement,
+  WarehouseTask,
+} from './types';
 
 const base = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 let token: string | null = null;
-export function setApiToken(value: string | null) { token = value; }
+export function setApiToken(value: string | null) {
+  token = value;
+}
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let response: Response;
@@ -16,7 +34,10 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (!response.ok) {
     let message = `Request failed (${response.status})`;
-    try { const body = await response.json(); message = Array.isArray(body.message) ? body.message.join(', ') : body.message ?? message; } catch { }
+    try {
+      const body = await response.json();
+      message = Array.isArray(body.message) ? body.message.join(', ') : (body.message ?? message);
+    } catch {}
     throw new Error(message);
   }
   return response.json();
@@ -46,13 +67,16 @@ export const api = {
   createInventoryItem: (body: Partial<InventoryItem>) => request<InventoryItem>('/warehouse/items', { method: 'POST', body: JSON.stringify(body) }),
   warehouseStock: () => request<InventoryStock[]>('/warehouse/stock'),
   warehouseMovements: () => request<WarehouseMovement[]>('/warehouse/movements'),
-  receiveWarehouseStock: (body: { itemId: string; locationId: string; quantity: number; orderId?: string; notes?: string }) => request<WarehouseMovement>('/warehouse/receipts', { method: 'POST', body: JSON.stringify(body) }),
-  pickWarehouseStock: (body: { itemId: string; locationId: string; orderId: string; quantity: number; notes?: string }) => request<WarehouseMovement>('/warehouse/picks', { method: 'POST', body: JSON.stringify(body) }),
+  receiveWarehouseStock: (body: { itemId: string; locationId: string; quantity: number; orderId?: string; notes?: string }) =>
+    request<WarehouseMovement>('/warehouse/receipts', { method: 'POST', body: JSON.stringify(body) }),
+  pickWarehouseStock: (body: { itemId: string; locationId: string; orderId: string; quantity: number; notes?: string }) =>
+    request<WarehouseMovement>('/warehouse/picks', { method: 'POST', body: JSON.stringify(body) }),
   dispatchWarehouseStock: (id: string, body: { notes?: string }) => request<WarehouseMovement>(`/warehouse/movements/${id}/dispatch`, { method: 'POST', body: JSON.stringify(body) }),
   order: (id: string) => request<OrderDetail>(`/orders/${id}`),
   createOrder: (body: Partial<Order>) => request<Order>('/orders', { method: 'POST', body: JSON.stringify(body) }),
   deliveryUpdate: (id: string, body: Partial<DeliveryUpdate>) => request<DeliveryUpdate>(`/orders/${id}/delivery-updates`, { method: 'POST', body: JSON.stringify(body) }),
-  ledgerEntry: (id: string, body: Partial<LedgerEntry> & { kind: string; amount: number; occurredOn: string }) => request<LedgerEntry>(`/orders/${id}/ledger`, { method: 'POST', body: JSON.stringify(body) }),
+  ledgerEntry: (id: string, body: Partial<LedgerEntry> & { kind: string; amount: number; occurredOn: string }) =>
+    request<LedgerEntry>(`/orders/${id}/ledger`, { method: 'POST', body: JSON.stringify(body) }),
   staff: () => request<Staff[]>('/staff'),
   teams: () => request<Team[]>('/teams'),
   createTeam: (name: string) => request<Team>('/teams', { method: 'POST', body: JSON.stringify({ name }) }),

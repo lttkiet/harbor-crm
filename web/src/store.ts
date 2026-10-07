@@ -9,8 +9,12 @@ const preferencesSlice = createSlice({
   name: 'preferences',
   initialState,
   reducers: {
-    setSection: (state, action: PayloadAction<WorkspaceSection>) => { state.selectedSection = action.payload; },
-    setOrderFilter: (state, action: PayloadAction<Preferences['orderFilter']>) => { state.orderFilter = action.payload; },
+    setSection: (state, action: PayloadAction<WorkspaceSection>) => {
+      state.selectedSection = action.payload;
+    },
+    setOrderFilter: (state, action: PayloadAction<Preferences['orderFilter']>) => {
+      state.orderFilter = action.payload;
+    },
     setPreferenceUser: (state, action: PayloadAction<string>) => {
       if (state.userId !== action.payload) {
         state.userId = action.payload;

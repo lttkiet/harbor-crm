@@ -3,7 +3,14 @@ import type { User } from 'firebase/auth';
 import { api, setApiToken } from './api';
 import type { Session } from './types';
 
-type AuthValue = { user: Session['user'] | null; token: string | null; loading: boolean; signIn: (email: string, password: string) => Promise<void>; signOutUser: () => Promise<void>; changePassword: (currentPassword: string, newPassword: string) => Promise<void> };
+type AuthValue = {
+  user: Session['user'] | null;
+  token: string | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOutUser: () => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+};
 const AuthContext = createContext<AuthValue | null>(null);
 const mode = import.meta.env.VITE_AUTH_MODE ?? 'dev';
 const firebaseMode = mode === 'firebase';
@@ -38,27 +45,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (localPasswordMode) {
       const saved = sessionStorage.getItem('harbor-session');
-      if (!saved) { setLoading(false); return; }
+      if (!saved) {
+        setLoading(false);
+        return;
+      }
       setApiToken(saved);
       setToken(saved);
-      api.currentSession().then(({ user: currentUser }) => setUser(currentUser)).catch(() => { sessionStorage.removeItem('harbor-session'); setApiToken(null); setToken(null); }).finally(() => setLoading(false));
+      api
+        .currentSession()
+        .then(({ user: currentUser }) => setUser(currentUser))
+        .catch(() => {
+          sessionStorage.removeItem('harbor-session');
+          setApiToken(null);
+          setToken(null);
+        })
+        .finally(() => setLoading(false));
       return;
     }
-    if (!firebaseMode) { setLoading(false); return; }
+    if (!firebaseMode) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
-    void getFirebaseAuth().then(({ auth, sdk }) => {
-      if (cancelled) return;
-      unsubscribe = sdk.onIdTokenChanged(auth, async (firebaseUser) => {
-        try {
-          if (firebaseUser) await exchange(firebaseUser);
-          else { setApiToken(null); setToken(null); setUser(null); }
-        } catch {
-          setApiToken(null); setToken(null); setUser(null);
-        } finally { setLoading(false); }
+    void getFirebaseAuth()
+      .then(({ auth, sdk }) => {
+        if (cancelled) return;
+        unsubscribe = sdk.onIdTokenChanged(auth, async (firebaseUser) => {
+          try {
+            if (firebaseUser) await exchange(firebaseUser);
+            else {
+              setApiToken(null);
+              setToken(null);
+              setUser(null);
+            }
+          } catch {
+            setApiToken(null);
+            setToken(null);
+            setUser(null);
+          } finally {
+            setLoading(false);
+          }
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
       });
-    }).catch(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; unsubscribe?.(); };
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, []);
 
   async function signIn(email: string, password: string) {
@@ -78,13 +114,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const { auth, sdk } = await getFirebaseAuth();
     const credential = await sdk.signInWithEmailAndPassword(auth, email, password);
-    try { await exchange(credential.user); }
-    catch (error) { await sdk.signOut(auth); throw error; }
+    try {
+      await exchange(credential.user);
+    } catch (error) {
+      await sdk.signOut(auth);
+      throw error;
+    }
   }
 
   async function signOutUser() {
     if (localPasswordMode) sessionStorage.removeItem('harbor-session');
-    if (firebaseMode) { const { auth, sdk } = await getFirebaseAuth(); await sdk.signOut(auth); }
+    if (firebaseMode) {
+      const { auth, sdk } = await getFirebaseAuth();
+      await sdk.signOut(auth);
+    }
     setApiToken(null);
     setToken(null);
     setUser(null);

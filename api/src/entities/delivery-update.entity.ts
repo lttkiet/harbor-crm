@@ -5,7 +5,8 @@ import { Order } from './order.entity';
 export class DeliveryUpdate {
   @PrimaryGeneratedColumn('uuid') id: string;
   @ManyToOne(() => Order, (order) => order.deliveryUpdates, { onDelete: 'CASCADE' })
-  @JoinColumn() order: Order;
+  @JoinColumn()
+  order: Order;
   @Column('uuid') orderId: string;
   @Column({ type: 'varchar', length: 30 }) status: string;
   @Column({ type: 'text', nullable: true }) notes: string | null;

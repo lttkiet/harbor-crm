@@ -18,7 +18,13 @@ dayjs.locale('en-gb');
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ConfigProvider locale={enGB}>
-      <Provider store={store}><PersistGate loading={null} persistor={persistor}><AuthProvider><App /></AuthProvider></PersistGate></Provider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </PersistGate>
+      </Provider>
     </ConfigProvider>
   </React.StrictMode>,
 );

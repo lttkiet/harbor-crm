@@ -15,7 +15,8 @@ export class Staff {
   @Column({ type: 'integer', default: 0 }) sessionVersion: number;
   @Column({ type: 'uuid', nullable: true }) teamId: string | null;
   @ManyToOne(() => Team, (team) => team.staff, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'teamId' }) team: Team | null;
+  @JoinColumn({ name: 'teamId' })
+  team: Team | null;
   @Column({ type: 'boolean', default: false }) isTeamLead: boolean;
   @CreateDateColumn() createdAt: Date;
   @UpdateDateColumn() updatedAt: Date;

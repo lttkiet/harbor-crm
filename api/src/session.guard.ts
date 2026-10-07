@@ -6,7 +6,10 @@ import { Staff } from './entities/staff.entity';
 
 @Injectable()
 export class SessionGuard implements CanActivate {
-  constructor(private readonly jwt: JwtService, @InjectRepository(Staff) private readonly staff: Repository<Staff>) {}
+  constructor(
+    private readonly jwt: JwtService,
+    @InjectRepository(Staff) private readonly staff: Repository<Staff>,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -22,7 +25,8 @@ export class SessionGuard implements CanActivate {
       if (!staff) throw new UnauthorizedException('Staff account is no longer active');
       if ((claims.sessionVersion ?? 0) !== staff.sessionVersion) throw new UnauthorizedException('Session expired');
       request.user = { sub: staff.id, id: staff.id, email: staff.email, role: staff.role, teamId: staff.teamId, isTeamLead: staff.isTeamLead, mustChangePassword: staff.mustChangePassword };
-      if (staff.mustChangePassword && !request.path.endsWith('/auth/password') && !request.path.endsWith('/auth/me')) throw new UnauthorizedException('Change your temporary password before continuing');
+      if (staff.mustChangePassword && !request.path.endsWith('/auth/password') && !request.path.endsWith('/auth/me'))
+        throw new UnauthorizedException('Change your temporary password before continuing');
       return true;
     } catch {
       throw new UnauthorizedException('Session expired');

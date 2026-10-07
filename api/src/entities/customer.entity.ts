@@ -17,7 +17,8 @@ export class Customer {
   @Column({ type: 'text', nullable: true }) address: string | null;
   @Column({ type: 'uuid', nullable: true }) ownerStaffId: string | null;
   @ManyToOne(() => Staff, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'ownerStaffId' }) ownerStaff: Staff | null;
+  @JoinColumn({ name: 'ownerStaffId' })
+  ownerStaff: Staff | null;
   @CreateDateColumn() createdAt: Date;
   @OneToMany(() => Order, (order) => order.customer) orders: Order[];
 }

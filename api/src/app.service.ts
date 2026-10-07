@@ -35,7 +35,8 @@ export class AppService implements OnModuleInit {
     let admin = await this.staff.createQueryBuilder('staff').addSelect('staff.passwordHash').where('staff.email = :email', { email }).getOne();
     if (!admin?.passwordHash) {
       const password = process.env.LAN_ADMIN_PASSWORD;
-      if (!password || password.length < 12 || Buffer.byteLength(password, 'utf8') > 72) throw new Error('Local auth requires a LAN_ADMIN_PASSWORD of 12 to 72 UTF-8 bytes to provision the admin account');
+      if (!password || password.length < 12 || Buffer.byteLength(password, 'utf8') > 72)
+        throw new Error('Local auth requires a LAN_ADMIN_PASSWORD of 12 to 72 UTF-8 bytes to provision the admin account');
       if (!admin) admin = this.staff.create({ email, role: 'admin', firebaseUid: null, passwordHash: null });
       admin.passwordHash = await hash(password, 12);
       admin.mustChangePassword = true;
@@ -52,7 +53,7 @@ export class AppService implements OnModuleInit {
   async localSession(email: string, password: string) {
     if (process.env.AUTH_MODE !== 'local') throw new UnauthorizedException('Local password sign-in is disabled');
     const staff = await this.staff.createQueryBuilder('staff').addSelect('staff.passwordHash').where('LOWER(staff.email) = LOWER(:email)', { email }).getOne();
-    if (!staff?.passwordHash || Buffer.byteLength(password, 'utf8') > 72 || !await compare(password, staff.passwordHash)) throw new UnauthorizedException('Invalid email or password');
+    if (!staff?.passwordHash || Buffer.byteLength(password, 'utf8') > 72 || !(await compare(password, staff.passwordHash))) throw new UnauthorizedException('Invalid email or password');
     return this.session(staff);
   }
 
@@ -61,7 +62,7 @@ export class AppService implements OnModuleInit {
     if (newPassword.length < 12) throw new ForbiddenException('Password must be at least 12 characters');
     if (Buffer.byteLength(newPassword, 'utf8') > 72) throw new ForbiddenException('Password must be no more than 72 UTF-8 bytes');
     const staff = await this.staff.createQueryBuilder('staff').addSelect('staff.passwordHash').where('staff.id = :id', { id: user.sub }).getOne();
-    if (!staff?.passwordHash || !await compare(currentPassword, staff.passwordHash)) throw new UnauthorizedException('Current password is incorrect');
+    if (!staff?.passwordHash || !(await compare(currentPassword, staff.passwordHash))) throw new UnauthorizedException('Current password is incorrect');
     staff.passwordHash = await hash(newPassword, 12);
     staff.mustChangePassword = false;
     staff.sessionVersion = (staff.sessionVersion ?? 0) + 1;
@@ -75,7 +76,10 @@ export class AppService implements OnModuleInit {
 
   async createSession(idToken: string) {
     if (process.env.AUTH_MODE === 'dev' && process.env.NODE_ENV === 'development') {
-      return { accessToken: this.jwt.sign({ sub: 'local-admin', email: 'admin@example.com' }), user: { id: 'local-admin', email: 'admin@example.com', role: 'admin', teamId: null, isTeamLead: false } };
+      return {
+        accessToken: this.jwt.sign({ sub: 'local-admin', email: 'admin@example.com' }),
+        user: { id: 'local-admin', email: 'admin@example.com', role: 'admin', teamId: null, isTeamLead: false },
+      };
     }
     if (process.env.AUTH_MODE !== 'firebase') throw new UnauthorizedException('Firebase sign-in is disabled');
     try {
@@ -120,9 +124,10 @@ export class AppService implements OnModuleInit {
 
   private async withBilledTotals(orders: Order[]) {
     if (!orders.length) return [];
-    const charges = await this.ledger.createQueryBuilder('entry')
+    const charges = await this.ledger
+      .createQueryBuilder('entry')
       .select('entry.orderId', 'orderId')
-      .addSelect("COALESCE(SUM(entry.amount), 0)", 'customerCharges')
+      .addSelect('COALESCE(SUM(entry.amount), 0)', 'customerCharges')
       .where('entry.kind = :kind', { kind: 'customer_charge' })
       .andWhere('entry.orderId IN (:...orderIds)', { orderIds: orders.map((order) => order.id) })
       .groupBy('entry.orderId')
@@ -137,7 +142,7 @@ export class AppService implements OnModuleInit {
 
   private async scopedOrder(id: string, user: any): Promise<Order> {
     const order = await this.orders.findOne({ where: { id }, relations: { customer: true } });
-    if (!order || !await this.canViewCustomer(order.customer, user)) throw new NotFoundException('Order not found');
+    if (!order || !(await this.canViewCustomer(order.customer, user))) throw new NotFoundException('Order not found');
     return order;
   }
 
@@ -162,10 +167,20 @@ export class AppService implements OnModuleInit {
       orderQuery.where('customer.ownerStaffId IN (:...owners)', { owners });
     }
     const [customers, totalOrders, activeOrders, delivered, orders] = await Promise.all([
-      customerQuery.getCount(), orderQuery.clone().getCount(),
-      orderQuery.clone().andWhere('order.status IN (:...statuses)', { statuses: ['new', 'sourcing', 'ready', 'in_transit'] }).getCount(),
+      customerQuery.getCount(),
+      orderQuery.clone().getCount(),
+      orderQuery
+        .clone()
+        .andWhere('order.status IN (:...statuses)', { statuses: ['new', 'sourcing', 'ready', 'in_transit'] })
+        .getCount(),
       orderQuery.clone().andWhere('order.status = :status', { status: 'delivered' }).getCount(),
-      orderQuery.clone().leftJoinAndSelect('order.customer', 'orderCustomer').orderBy('order.createdAt', 'DESC').take(8).getMany().then((rows) => this.withBilledTotals(rows)),
+      orderQuery
+        .clone()
+        .leftJoinAndSelect('order.customer', 'orderCustomer')
+        .orderBy('order.createdAt', 'DESC')
+        .take(8)
+        .getMany()
+        .then((rows) => this.withBilledTotals(rows)),
     ]);
     return { customers, totalOrders, activeOrders, delivered, recentOrders: orders };
   }
@@ -179,20 +194,37 @@ export class AppService implements OnModuleInit {
   }
 
   async createCustomer(input: Partial<Customer>, user: any) {
-    return this.customers.save(this.customers.create({ ...input, contactName: input.type === 'individual' ? null : input.contactName, taxId: input.type === 'individual' ? null : input.taxId, ownerStaffId: user.sub === 'local-admin' ? null : user.sub, email: input.email?.toLowerCase() ?? null }));
+    return this.customers.save(
+      this.customers.create({
+        ...input,
+        contactName: input.type === 'individual' ? null : input.contactName,
+        taxId: input.type === 'individual' ? null : input.taxId,
+        ownerStaffId: user.sub === 'local-admin' ? null : user.sub,
+        email: input.email?.toLowerCase() ?? null,
+      }),
+    );
   }
 
   async updateCustomer(id: string, input: Partial<Customer>, user: any) {
     const customer = await this.customers.findOneBy({ id });
     if (!customer) throw new NotFoundException('Customer not found');
     await this.assertCanManageCustomer(customer, user);
-    Object.assign(customer, { type: input.type, name: input.name, contactName: input.type === 'individual' ? null : input.contactName, taxId: input.type === 'individual' ? null : input.taxId, email: input.email?.toLowerCase() ?? input.email, phone: input.phone, address: input.address });
+    Object.assign(customer, {
+      type: input.type,
+      name: input.name,
+      contactName: input.type === 'individual' ? null : input.contactName,
+      taxId: input.type === 'individual' ? null : input.taxId,
+      email: input.email?.toLowerCase() ?? input.email,
+      phone: input.phone,
+      address: input.address,
+    });
     return this.customers.save(customer);
   }
 
   async listOrders(filters: { type?: string; status?: string; search?: string }, user: any) {
     const owners = await this.visibleOwnerIds(user);
-    const query = this.orders.createQueryBuilder('order')
+    const query = this.orders
+      .createQueryBuilder('order')
       .leftJoinAndSelect('order.customer', 'customer')
       .leftJoin('order.warehouseAssignee', 'warehouseAssignee')
       .addSelect(['warehouseAssignee.id', 'warehouseAssignee.email'])
@@ -210,7 +242,8 @@ export class AppService implements OnModuleInit {
     if (owners) ordersQuery.andWhere('customer.ownerStaffId IN (:...owners)', { owners });
     const orders = await ordersQuery.getMany();
     if (!orders.length) return [];
-    const ledgerTotals = await this.ledger.createQueryBuilder('entry')
+    const ledgerTotals = await this.ledger
+      .createQueryBuilder('entry')
       .select('entry.orderId', 'orderId')
       .addSelect("COALESCE(SUM(CASE WHEN entry.kind = 'customer_charge' THEN entry.amount ELSE 0 END), 0)", 'customerCharges')
       .addSelect("COALESCE(SUM(CASE WHEN entry.kind = 'customer_payment' THEN entry.amount ELSE 0 END), 0)", 'paidByCustomer')
@@ -257,9 +290,25 @@ export class AppService implements OnModuleInit {
 
   async warehouseTasks(user: any) {
     const assigneeIds = await this.warehouseAssigneeIds(user);
-    const query = this.orders.createQueryBuilder('order')
+    const query = this.orders
+      .createQueryBuilder('order')
       .leftJoin('order.warehouseAssignee', 'assignee')
-      .select(['order.id', 'order.orderNumber', 'order.type', 'order.status', 'order.origin', 'order.destination', 'order.cargoDescription', 'order.items', 'order.carrierName', 'order.trackingNumber', 'order.createdAt', 'order.warehouseStaffId', 'assignee.id', 'assignee.email'])
+      .select([
+        'order.id',
+        'order.orderNumber',
+        'order.type',
+        'order.status',
+        'order.origin',
+        'order.destination',
+        'order.cargoDescription',
+        'order.items',
+        'order.carrierName',
+        'order.trackingNumber',
+        'order.createdAt',
+        'order.warehouseStaffId',
+        'assignee.id',
+        'assignee.email',
+      ])
       .orderBy('order.updatedAt', 'DESC');
     if (assigneeIds) query.where('order.warehouseStaffId IN (:...assigneeIds)', { assigneeIds });
     return (await query.getMany()).map((order) => this.warehouseTaskView(order));
@@ -291,19 +340,25 @@ export class AppService implements OnModuleInit {
     if (user.role !== 'admin') await this.warehouseOrder(order.id, user);
 
     const repository = this.orders.manager.getRepository(WarehouseMovement);
-    const movements = await repository.createQueryBuilder('movement')
-      .leftJoin('movement.item', 'item').addSelect(['item.id', 'item.sku', 'item.name', 'item.unit'])
-      .leftJoin('movement.location', 'location').addSelect(['location.id', 'location.warehouseName', 'location.code'])
+    const movements = await repository
+      .createQueryBuilder('movement')
+      .leftJoin('movement.item', 'item')
+      .addSelect(['item.id', 'item.sku', 'item.name', 'item.unit'])
+      .leftJoin('movement.location', 'location')
+      .addSelect(['location.id', 'location.warehouseName', 'location.code'])
       .where('movement.orderId = :orderId', { orderId: order.id })
       .orderBy('movement.createdAt', 'DESC')
       .take(100)
       .getMany();
     const pickIds = movements.filter((movement) => movement.type === 'pick').map((movement) => movement.id);
-    const dispatched = pickIds.length ? await repository.createQueryBuilder('movement')
-      .select('movement.sourceMovementId', 'sourceMovementId')
-      .where('movement.type = :type', { type: 'dispatch' })
-      .andWhere('movement.sourceMovementId IN (:...pickIds)', { pickIds })
-      .getRawMany<{ sourceMovementId: string }>() : [];
+    const dispatched = pickIds.length
+      ? await repository
+          .createQueryBuilder('movement')
+          .select('movement.sourceMovementId', 'sourceMovementId')
+          .where('movement.type = :type', { type: 'dispatch' })
+          .andWhere('movement.sourceMovementId IN (:...pickIds)', { pickIds })
+          .getRawMany<{ sourceMovementId: string }>()
+      : [];
     const dispatchedPicks = new Set(dispatched.map((movement) => movement.sourceMovementId));
 
     return {
@@ -336,29 +391,41 @@ export class AppService implements OnModuleInit {
   }
 
   async warehouseStock() {
-    return this.orders.manager.getRepository(InventoryStock).createQueryBuilder('stock')
+    return this.orders.manager
+      .getRepository(InventoryStock)
+      .createQueryBuilder('stock')
       .leftJoinAndSelect('stock.item', 'item')
       .leftJoinAndSelect('stock.location', 'location')
-      .orderBy('item.sku', 'ASC').addOrderBy('location.warehouseName', 'ASC').addOrderBy('location.code', 'ASC')
+      .orderBy('item.sku', 'ASC')
+      .addOrderBy('location.warehouseName', 'ASC')
+      .addOrderBy('location.code', 'ASC')
       .getMany();
   }
 
   async warehouseMovements(user: any) {
     const assigneeIds = await this.warehouseAssigneeIds(user);
     const repository = this.orders.manager.getRepository(WarehouseMovement);
-    const query = repository.createQueryBuilder('movement')
-      .leftJoin('movement.item', 'item').addSelect(['item.id', 'item.sku', 'item.name', 'item.unit'])
-      .leftJoin('movement.location', 'location').addSelect(['location.id', 'location.warehouseName', 'location.code'])
-      .leftJoin('movement.order', 'order').addSelect(['order.id', 'order.orderNumber', 'order.warehouseStaffId'])
-      .orderBy('movement.createdAt', 'DESC').take(200);
+    const query = repository
+      .createQueryBuilder('movement')
+      .leftJoin('movement.item', 'item')
+      .addSelect(['item.id', 'item.sku', 'item.name', 'item.unit'])
+      .leftJoin('movement.location', 'location')
+      .addSelect(['location.id', 'location.warehouseName', 'location.code'])
+      .leftJoin('movement.order', 'order')
+      .addSelect(['order.id', 'order.orderNumber', 'order.warehouseStaffId'])
+      .orderBy('movement.createdAt', 'DESC')
+      .take(200);
     if (assigneeIds) query.andWhere('(movement.orderId IS NULL OR order.warehouseStaffId IN (:...assigneeIds))', { assigneeIds });
     const rows = await query.getMany();
     const picks = rows.filter((row) => row.type === 'pick').map((row) => row.id);
-    const dispatched = picks.length ? await repository.createQueryBuilder('movement')
-      .select('movement.sourceMovementId', 'sourceMovementId')
-      .where('movement.type = :type', { type: 'dispatch' })
-      .andWhere('movement.sourceMovementId IN (:...picks)', { picks })
-      .getRawMany<{ sourceMovementId: string }>() : [];
+    const dispatched = picks.length
+      ? await repository
+          .createQueryBuilder('movement')
+          .select('movement.sourceMovementId', 'sourceMovementId')
+          .where('movement.type = :type', { type: 'dispatch' })
+          .andWhere('movement.sourceMovementId IN (:...picks)', { picks })
+          .getRawMany<{ sourceMovementId: string }>()
+      : [];
     const dispatchedPicks = new Set(dispatched.map((row) => row.sourceMovementId));
     return rows.map((row) => ({ ...row, pendingDispatch: row.type === 'pick' && !dispatchedPicks.has(row.id) }));
   }
@@ -392,11 +459,25 @@ export class AppService implements OnModuleInit {
       if (order.type !== 'buy') throw new BadRequestException('Received stock can only be linked to a buy order');
     }
     return this.orders.manager.transaction(async (manager) => {
-      await manager.query(`INSERT INTO "inventory_stock" ("itemId", "locationId", "quantityOnHand", "quantityPicked", "updatedAt")
+      await manager.query(
+        `INSERT INTO "inventory_stock" ("itemId", "locationId", "quantityOnHand", "quantityPicked", "updatedAt")
         VALUES ($1, $2, $3, 0, now())
         ON CONFLICT ("itemId", "locationId") DO UPDATE
-        SET "quantityOnHand" = "inventory_stock"."quantityOnHand" + EXCLUDED."quantityOnHand", "updatedAt" = now()`, [item.id, location.id, input.quantity]);
-      return manager.getRepository(WarehouseMovement).save(manager.getRepository(WarehouseMovement).create({ type: 'receipt', itemId: item.id, locationId: location.id, orderId: input.orderId ?? null, sourceMovementId: null, quantity: input.quantity, notes: input.notes ?? null, performedBy: user.email }));
+        SET "quantityOnHand" = "inventory_stock"."quantityOnHand" + EXCLUDED."quantityOnHand", "updatedAt" = now()`,
+        [item.id, location.id, input.quantity],
+      );
+      return manager.getRepository(WarehouseMovement).save(
+        manager.getRepository(WarehouseMovement).create({
+          type: 'receipt',
+          itemId: item.id,
+          locationId: location.id,
+          orderId: input.orderId ?? null,
+          sourceMovementId: null,
+          quantity: input.quantity,
+          notes: input.notes ?? null,
+          performedBy: user.email,
+        }),
+      );
     });
   }
 
@@ -412,7 +493,18 @@ export class AppService implements OnModuleInit {
       if (!stock || available < input.quantity) throw new ConflictException(`Only ${available} ${item.unit} available at this location`);
       stock.quantityPicked += input.quantity;
       await repository.save(stock);
-      return manager.getRepository(WarehouseMovement).save(manager.getRepository(WarehouseMovement).create({ type: 'pick', itemId: item.id, locationId: location.id, orderId: order.id, sourceMovementId: null, quantity: input.quantity, notes: input.notes ?? null, performedBy: user.email }));
+      return manager.getRepository(WarehouseMovement).save(
+        manager.getRepository(WarehouseMovement).create({
+          type: 'pick',
+          itemId: item.id,
+          locationId: location.id,
+          orderId: order.id,
+          sourceMovementId: null,
+          quantity: input.quantity,
+          notes: input.notes ?? null,
+          performedBy: user.email,
+        }),
+      );
     });
   }
 
@@ -433,7 +525,16 @@ export class AppService implements OnModuleInit {
       stock.quantityPicked -= pick.quantity;
       stock.quantityOnHand -= pick.quantity;
       await stockRepository.save(stock);
-      const dispatch = movements.create({ type: 'dispatch' as WarehouseMovementType, itemId: pick.itemId, locationId: pick.locationId, orderId: pick.orderId, sourceMovementId: pick.id, quantity: pick.quantity, notes: input.notes ?? null, performedBy: user.email });
+      const dispatch = movements.create({
+        type: 'dispatch' as WarehouseMovementType,
+        itemId: pick.itemId,
+        locationId: pick.locationId,
+        orderId: pick.orderId,
+        sourceMovementId: pick.id,
+        quantity: pick.quantity,
+        notes: input.notes ?? null,
+        performedBy: user.email,
+      });
       const savedDispatch = await movements.save(dispatch);
       const orderPicks = await movements.find({ where: { type: 'pick', orderId: order.id }, select: { id: true } });
       const completed = orderPicks.length ? await movements.find({ where: { type: 'dispatch', sourceMovementId: In(orderPicks.map((row) => row.id)) }, select: { sourceMovementId: true } }) : [];
@@ -441,7 +542,9 @@ export class AppService implements OnModuleInit {
       if (order.status === 'ready' && orderPicks.every((row) => dispatchedPickIds.has(row.id))) {
         order.status = 'in_transit';
         await orderRepository.save(order);
-        await manager.getRepository(DeliveryUpdate).save(manager.getRepository(DeliveryUpdate).create({ orderId: order.id, status: 'in_transit', notes: 'Warehouse dispatch completed', updatedBy: user.email }));
+        await manager
+          .getRepository(DeliveryUpdate)
+          .save(manager.getRepository(DeliveryUpdate).create({ orderId: order.id, status: 'in_transit', notes: 'Warehouse dispatch completed', updatedBy: user.email }));
       }
       return savedDispatch;
     });
@@ -467,7 +570,16 @@ export class AppService implements OnModuleInit {
       );
       const nextNumber = (BigInt(maxNumber) + 1n).toString();
       const orderNumber = isBuy ? `mh-${dateKey}-${nextNumber}` : `kg-${dateKey}-${nextNumber}`;
-      const order = manager.getRepository(Order).create({ ...input, items: isBuy ? input.items : [], supplierName: isBuy ? input.supplierName : null, cargoDescription: isBuy ? null : input.cargoDescription, customerTotal: String(input.customerTotal ?? 0), estimatedCost: String(input.estimatedCost ?? 0), orderNumber, status: isBuy ? 'sourcing' : 'new' });
+      const order = manager.getRepository(Order).create({
+        ...input,
+        items: isBuy ? input.items : [],
+        supplierName: isBuy ? input.supplierName : null,
+        cargoDescription: isBuy ? null : input.cargoDescription,
+        customerTotal: String(input.customerTotal ?? 0),
+        estimatedCost: String(input.estimatedCost ?? 0),
+        orderNumber,
+        status: isBuy ? 'sourcing' : 'new',
+      });
       return manager.getRepository(Order).save(order);
     });
   }
@@ -489,8 +601,7 @@ export class AppService implements OnModuleInit {
     if (user.role === 'warehouse') {
       if (!['ready', 'in_transit', 'delivered'].includes(input.status)) throw new ForbiddenException('Warehouse staff can only update active shipment statuses');
       order = await this.warehouseOrder(id, user, true);
-    }
-    else {
+    } else {
       order = await this.scopedOrder(id, user);
       await this.assertCanManageCustomer(order.customer, user);
     }
@@ -550,7 +661,9 @@ export class AppService implements OnModuleInit {
     return this.staffResponse(await this.staff.save(staff));
   }
 
-  listTeams() { return this.teams.find({ order: { name: 'ASC' } }); }
+  listTeams() {
+    return this.teams.find({ order: { name: 'ASC' } });
+  }
 
   async createTeam(name: string) {
     const normalized = name.trim();
@@ -563,10 +676,19 @@ export class AppService implements OnModuleInit {
     const email = input.email.toLowerCase();
     if (await this.staff.findOneBy({ email })) throw new ForbiddenException('This staff email already exists');
     if (input.isTeamLead && !input.teamId) throw new ForbiddenException('Assign a team before granting team-lead access');
-    if (input.teamId && !await this.teams.findOneBy({ id: input.teamId })) throw new NotFoundException('Team not found');
-    if (process.env.AUTH_MODE === 'local' && (!input.temporaryPassword || input.temporaryPassword.length < 12 || Buffer.byteLength(input.temporaryPassword, 'utf8') > 72)) throw new ForbiddenException('Temporary password must be 12 to 72 UTF-8 bytes');
+    if (input.teamId && !(await this.teams.findOneBy({ id: input.teamId }))) throw new NotFoundException('Team not found');
+    if (process.env.AUTH_MODE === 'local' && (!input.temporaryPassword || input.temporaryPassword.length < 12 || Buffer.byteLength(input.temporaryPassword, 'utf8') > 72))
+      throw new ForbiddenException('Temporary password must be 12 to 72 UTF-8 bytes');
     const localPassword = process.env.AUTH_MODE === 'local' ? input.temporaryPassword : undefined;
-    const staff = this.staff.create({ email, role: input.role, teamId: input.teamId ?? null, isTeamLead: input.isTeamLead ?? false, firebaseUid: null, passwordHash: localPassword ? await hash(localPassword, 12) : null, mustChangePassword: Boolean(localPassword) });
+    const staff = this.staff.create({
+      email,
+      role: input.role,
+      teamId: input.teamId ?? null,
+      isTeamLead: input.isTeamLead ?? false,
+      firebaseUid: null,
+      passwordHash: localPassword ? await hash(localPassword, 12) : null,
+      mustChangePassword: Boolean(localPassword),
+    });
     return this.staffResponse(await this.staff.save(staff));
   }
 }

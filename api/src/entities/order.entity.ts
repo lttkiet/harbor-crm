@@ -14,11 +14,13 @@ export class Order {
   @Column({ type: 'varchar', length: 20 }) type: OrderType;
   @Column({ type: 'varchar', length: 30, default: 'new' }) status: OrderStatus;
   @ManyToOne(() => Customer, (customer) => customer.orders, { onDelete: 'RESTRICT' })
-  @JoinColumn() customer: Customer;
+  @JoinColumn()
+  customer: Customer;
   @Column('uuid') customerId: string;
   @Column({ type: 'uuid', nullable: true }) warehouseStaffId: string | null;
   @ManyToOne(() => Staff, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'warehouseStaffId' }) warehouseAssignee: Staff | null;
+  @JoinColumn({ name: 'warehouseStaffId' })
+  warehouseAssignee: Staff | null;
   @Column({ type: 'varchar', length: 200, nullable: true }) supplierName: string | null;
   @Column({ type: 'varchar', length: 200, nullable: true }) carrierName: string | null;
   @Column({ type: 'varchar', length: 200, nullable: true }) trackingNumber: string | null;

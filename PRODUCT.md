@@ -31,33 +31,33 @@ These are product intents inferred from the shipped workflows. The repository do
 
 Team-lead access is an additional visibility setting for an account. It does not grant edit rights to another staff member’s customer records.
 
-| User | Current product access |
-| --- | --- |
-| Administrator | All customers, orders, and financial records; shipment updates and warehouse assignment; shared warehouse catalog and inventory; staff and team setup; local temporary-password reset. |
-| Operations staff | Create customers and orders; view own records; update own customers, shipment details, delivery status, and ledger entries; assign warehouse work to eligible warehouse staff. |
-| Operations team lead | Operations capabilities on own records plus read-only visibility into team members’ customers, orders, and finance records. Cannot edit a teammate’s customer or order. |
-| Warehouse staff | See assigned warehouse tasks and the operational shipment fields needed to fulfill them; receive stock, pick eligible work, dispatch picks, update permitted shipment statuses, and use shared inventory tools. Cannot open customer, order-detail, or finance screens. |
-| Warehouse team lead | See team warehouse tasks and task details. Only the assignee can update a task. Shared inventory tools are available to warehouse accounts. |
-| Finance staff | View customers, orders, and finance summaries within the account’s record scope. Finance navigation excludes logistics, warehouse, and staff administration. Current write behavior is described under [open product decisions](#9-open-product-decisions). |
-| Finance team lead | Finance visibility across the team’s records, with teammate records remaining read-only under the current ownership rule. |
+| User                 | Current product access                                                                                                                                                                                                                                                  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Administrator        | All customers, orders, and financial records; shipment updates and warehouse assignment; shared warehouse catalog and inventory; staff and team setup; local temporary-password reset.                                                                                  |
+| Operations staff     | Create customers and orders; view own records; update own customers, shipment details, delivery status, and ledger entries; assign warehouse work to eligible warehouse staff.                                                                                          |
+| Operations team lead | Operations capabilities on own records plus read-only visibility into team members’ customers, orders, and finance records. Cannot edit a teammate’s customer or order.                                                                                                 |
+| Warehouse staff      | See assigned warehouse tasks and the operational shipment fields needed to fulfill them; receive stock, pick eligible work, dispatch picks, update permitted shipment statuses, and use shared inventory tools. Cannot open customer, order-detail, or finance screens. |
+| Warehouse team lead  | See team warehouse tasks and task details. Only the assignee can update a task. Shared inventory tools are available to warehouse accounts.                                                                                                                             |
+| Finance staff        | View customers, orders, and finance summaries within the account’s record scope. Finance navigation excludes logistics, warehouse, and staff administration. Current write behavior is described under [open product decisions](#9-open-product-decisions).             |
+| Finance team lead    | Finance visibility across the team’s records, with teammate records remaining read-only under the current ownership rule.                                                                                                                                               |
 
 ### Access matrix
 
 “Own” means customer records owned by the signed-in staff member. “Team view” means read-only visibility to records owned by staff assigned to the same team.
 
-| Capability | Admin | Operations | Warehouse | Finance |
-| --- | --- | --- | --- | --- |
-| View customers and customer details | All | Own; team view for team leads | No | Own/team scope, read-only |
-| Create or edit customers | All | Create; edit own | No | No |
-| Create orders | All | For own customers | No | No |
-| View order details and ledger | All | Own; team view for team leads | No order-detail screen | Own/team scope, read-only for others’ records |
-| Add ledger entries | All | Own customers’ orders | No | API/UI allow only where ownership passes; see open decision |
-| Update logistics | All | Own customer orders | Assigned tasks only | No |
-| Assign warehouse staff | All | Own customer orders; eligible same-team warehouse staff | No | No |
-| View warehouse task data | All | Shipment list through logistics | Assigned tasks; team tasks for warehouse leads | No |
-| Receive, pick, or dispatch task stock | All | No | Assigned task only | No |
-| Manage shared inventory catalog and locations | All | No | Yes | No |
-| Manage staff and teams | Yes | No | No | No |
+| Capability                                    | Admin | Operations                                              | Warehouse                                      | Finance                                                     |
+| --------------------------------------------- | ----- | ------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| View customers and customer details           | All   | Own; team view for team leads                           | No                                             | Own/team scope, read-only                                   |
+| Create or edit customers                      | All   | Create; edit own                                        | No                                             | No                                                          |
+| Create orders                                 | All   | For own customers                                       | No                                             | No                                                          |
+| View order details and ledger                 | All   | Own; team view for team leads                           | No order-detail screen                         | Own/team scope, read-only for others’ records               |
+| Add ledger entries                            | All   | Own customers’ orders                                   | No                                             | API/UI allow only where ownership passes; see open decision |
+| Update logistics                              | All   | Own customer orders                                     | Assigned tasks only                            | No                                                          |
+| Assign warehouse staff                        | All   | Own customer orders; eligible same-team warehouse staff | No                                             | No                                                          |
+| View warehouse task data                      | All   | Shipment list through logistics                         | Assigned tasks; team tasks for warehouse leads | No                                                          |
+| Receive, pick, or dispatch task stock         | All   | No                                                      | Assigned task only                             | No                                                          |
+| Manage shared inventory catalog and locations | All   | No                                                      | Yes                                            | No                                                          |
+| Manage staff and teams                        | Yes   | No                                                      | No                                             | No                                                          |
 
 ## 4. Core records
 
@@ -136,17 +136,17 @@ Order numbers are encoded as Code 128 labels. Staff can print a label from order
 
 The following requirements describe the current documented product scope. “Implemented” means the current repository contains the described workflow; builds and prior browser review provide implementation evidence.
 
-| ID | Requirement | Acceptance criteria | Current status |
-| --- | --- | --- | --- |
-| FR-01 | Authenticate and onboard staff | Local and Firebase modes issue API sessions; local passwords are hashed; temporary passwords require change before other API use; development demo auth is development-only. | Implemented |
-| FR-02 | Manage customers | Operations can create and edit own customer records; admin can manage all; team leads can view their team; individuals and businesses have the appropriate fields. | Implemented |
-| FR-03 | Create and find orders | Operations/admin can create buy and transport orders; order numbering is unique per day and shared across types; list search and type filtering work within the user’s scope. | Implemented |
-| FR-04 | Track shipment progress | Authorized staff can add status updates and shipment details; warehouse updates are limited to active shipment statuses; the final dispatch moves a ready shipment to in transit. | Implemented |
-| FR-05 | Record and review ledger activity | Supported charge/payment/cost/payout types attach to an order; finance totals and balances are derived from ledger and order values; access follows the order’s customer scope. | Implemented; write policy needs clarification |
-| FR-06 | Configure teams and staff | Admin can create teams, add role-scoped staff, set team-lead visibility, and issue LAN temporary passwords. | Implemented for create/reset; ongoing staff maintenance needs clarification |
-| FR-07 | Fulfill assigned warehouse work | Warehouse users can look up authorized tasks, receive stock, pick stock, dispatch picks, and inspect movements; teammate task details are view-only. | Implemented in the UI; server-side pick type rule needs clarification |
-| FR-08 | Protect sensitive data by role | Warehouse task responses omit customer and payment details; cross-team records are not visible; role checks apply at the API as well as in navigation and actions. | Implemented and reviewed |
-| FR-09 | Operate on supported local infrastructure | Docker Compose starts web/API/PostgreSQL; production config uses migrations and requires a strong unique JWT secret; LAN deployment keeps database bound to loopback by default. | Implemented/configuration documented |
+| ID    | Requirement                               | Acceptance criteria                                                                                                                                                               | Current status                                                              |
+| ----- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| FR-01 | Authenticate and onboard staff            | Local and Firebase modes issue API sessions; local passwords are hashed; temporary passwords require change before other API use; development demo auth is development-only.      | Implemented                                                                 |
+| FR-02 | Manage customers                          | Operations can create and edit own customer records; admin can manage all; team leads can view their team; individuals and businesses have the appropriate fields.                | Implemented                                                                 |
+| FR-03 | Create and find orders                    | Operations/admin can create buy and transport orders; order numbering is unique per day and shared across types; list search and type filtering work within the user’s scope.     | Implemented                                                                 |
+| FR-04 | Track shipment progress                   | Authorized staff can add status updates and shipment details; warehouse updates are limited to active shipment statuses; the final dispatch moves a ready shipment to in transit. | Implemented                                                                 |
+| FR-05 | Record and review ledger activity         | Supported charge/payment/cost/payout types attach to an order; finance totals and balances are derived from ledger and order values; access follows the order’s customer scope.   | Implemented; write policy needs clarification                               |
+| FR-06 | Configure teams and staff                 | Admin can create teams, add role-scoped staff, set team-lead visibility, and issue LAN temporary passwords.                                                                       | Implemented for create/reset; ongoing staff maintenance needs clarification |
+| FR-07 | Fulfill assigned warehouse work           | Warehouse users can look up authorized tasks, receive stock, pick stock, dispatch picks, and inspect movements; teammate task details are view-only.                              | Implemented in the UI; server-side pick type rule needs clarification       |
+| FR-08 | Protect sensitive data by role            | Warehouse task responses omit customer and payment details; cross-team records are not visible; role checks apply at the API as well as in navigation and actions.                | Implemented and reviewed                                                    |
+| FR-09 | Operate on supported local infrastructure | Docker Compose starts web/API/PostgreSQL; production config uses migrations and requires a strong unique JWT secret; LAN deployment keeps database bound to loopback by default.  | Implemented/configuration documented                                        |
 
 ## 7. Quality and operational requirements
 
@@ -202,12 +202,12 @@ The implemented workspace covers internal customer and fulfillment operations. T
 
 The workspace has one Overview entry and role-filtered sections. A section is not rendered when the role is not allowed to use it, and the API applies its own role checks.
 
-| Role | Visible navigation |
-| --- | --- |
+| Role          | Visible navigation                                                       |
+| ------------- | ------------------------------------------------------------------------ |
 | Administrator | Overview, Customers, Orders, Logistics, Finance, Warehouse, Staff access |
-| Operations | Overview, Customers, Orders, Logistics, Finance |
-| Warehouse | Overview, Logistics, Warehouse |
-| Finance | Overview, Customers, Orders, Finance |
+| Operations    | Overview, Customers, Orders, Logistics, Finance                          |
+| Warehouse     | Overview, Logistics, Warehouse                                           |
+| Finance       | Overview, Customers, Orders, Finance                                     |
 
 The selected workspace section and order type filter are persisted in browser local storage. Preferences are scoped to the signed-in user; switching users resets them to Overview and all order types. LAN API credentials use session storage. Firebase session persistence is managed by Firebase Authentication.
 
@@ -325,21 +325,21 @@ New team asks for a name. Temporary-password reset asks for a replacement passwo
 
 ### 13.10 Search, sorting, and pagination
 
-| List | Search/filter | Default ordering | Page size and source |
-| --- | --- | --- | --- |
-| Customers | Case-insensitive partial match on name, email, or phone | Newest customer first | Eight rows; API returns all matches, browser paginates |
-| Orders | Case-insensitive partial match on order number or customer; type filter | Newest order first | Eight rows; API returns all matches, browser paginates |
-| Recent orders | None on the dashboard | Newest order first | Up to eight rows returned by API |
-| Logistics, Admin/Operations | Order number/customer search; status selector | Newest order first | Eight rows; browser paginates |
-| Logistics, Warehouse | Client-side match on order number, route, cargo, item names; status selector | Recently updated task first | Eight rows; API returns authorized tasks |
-| Finance | No search or filter | Newest order first | Ten rows; API returns all visible orders, browser paginates |
-| Warehouse stock | No search/filter | SKU, warehouse, then location code | Eight rows; API returns all stock rows |
-| Warehouse activity | No search/filter | Newest movement first | Eight visible rows; API caps the list at 200 |
-| Warehouse items | No search/filter | SKU ascending | Six rows; API returns catalog |
-| Warehouse locations | No search/filter | Warehouse name then location code | Six rows; API returns locations |
-| Staff access | No search/filter | Newest staff record first | No pagination |
-| Team options | No team directory screen; options appear in the Add staff selector | Team name ascending | Loaded as selector options |
-| Warehouse assignees | Searchable email selector in shipment assignment | Staff email ascending | Loaded as assignment options |
+| List                        | Search/filter                                                                | Default ordering                   | Page size and source                                        |
+| --------------------------- | ---------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------- |
+| Customers                   | Case-insensitive partial match on name, email, or phone                      | Newest customer first              | Eight rows; API returns all matches, browser paginates      |
+| Orders                      | Case-insensitive partial match on order number or customer; type filter      | Newest order first                 | Eight rows; API returns all matches, browser paginates      |
+| Recent orders               | None on the dashboard                                                        | Newest order first                 | Up to eight rows returned by API                            |
+| Logistics, Admin/Operations | Order number/customer search; status selector                                | Newest order first                 | Eight rows; browser paginates                               |
+| Logistics, Warehouse        | Client-side match on order number, route, cargo, item names; status selector | Recently updated task first        | Eight rows; API returns authorized tasks                    |
+| Finance                     | No search or filter                                                          | Newest order first                 | Ten rows; API returns all visible orders, browser paginates |
+| Warehouse stock             | No search/filter                                                             | SKU, warehouse, then location code | Eight rows; API returns all stock rows                      |
+| Warehouse activity          | No search/filter                                                             | Newest movement first              | Eight visible rows; API caps the list at 200                |
+| Warehouse items             | No search/filter                                                             | SKU ascending                      | Six rows; API returns catalog                               |
+| Warehouse locations         | No search/filter                                                             | Warehouse name then location code  | Six rows; API returns locations                             |
+| Staff access                | No search/filter                                                             | Newest staff record first          | No pagination                                               |
+| Team options                | No team directory screen; options appear in the Add staff selector           | Team name ascending                | Loaded as selector options                                  |
+| Warehouse assignees         | Searchable email selector in shipment assignment                             | Staff email ascending              | Loaded as assignment options                                |
 
 Tables do not expose column sorting controls. Search fields issue requests as their values change unless the Warehouse task list is being filtered locally. There is no server-side pagination, export, saved filter, or bulk action in the current product.
 
@@ -349,36 +349,36 @@ The visual implementation uses Ant Design components with application-specific C
 
 ### Layout and type
 
-| Element | Current specification |
-| --- | --- |
-| Base background | #f4f7fb; body minimum width 320 px |
-| Primary text | #182333; page headings #172438 |
-| Navigation rail | White, 236 px wide, 1 px #e8edf3 right border |
-| Top bar | White, 72 px high, sticky, 1 px #e8edf3 bottom border |
-| Desktop content | 34 px top / 36 px sides / 54 px bottom padding |
-| Page title | Manrope/sans-serif stack, 28 px, weight 750; 24 px below 600 px viewport |
-| Body font | Arial/sans-serif |
-| Cards | White, 13 px radius, subtle #1b2a3d08 shadow; 22 px body padding, 14 px on small screens |
-| Login card | Max width 420 px, 18 px radius, 36 px body padding (27 px small screens) |
-| Main breakpoint | 991 px: replace rail with mobile nav drawer; remove content left margin |
-| Small breakpoint | 600 px: stack headings and toolbars; reduce content and card padding |
-| Modal and drawer corners | 13 px radius |
+| Element                  | Current specification                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| Base background          | #f4f7fb; body minimum width 320 px                                                       |
+| Primary text             | #182333; page headings #172438                                                           |
+| Navigation rail          | White, 236 px wide, 1 px #e8edf3 right border                                            |
+| Top bar                  | White, 72 px high, sticky, 1 px #e8edf3 bottom border                                    |
+| Desktop content          | 34 px top / 36 px sides / 54 px bottom padding                                           |
+| Page title               | Manrope/sans-serif stack, 28 px, weight 750; 24 px below 600 px viewport                 |
+| Body font                | Arial/sans-serif                                                                         |
+| Cards                    | White, 13 px radius, subtle #1b2a3d08 shadow; 22 px body padding, 14 px on small screens |
+| Login card               | Max width 420 px, 18 px radius, 36 px body padding (27 px small screens)                 |
+| Main breakpoint          | 991 px: replace rail with mobile nav drawer; remove content left margin                  |
+| Small breakpoint         | 600 px: stack headings and toolbars; reduce content and card padding                     |
+| Modal and drawer corners | 13 px radius                                                                             |
 
 Manrope is named in CSS for brand, headings, and metric numbers but is not bundled or imported by the current repository; browsers use their sans-serif fallback unless the environment supplies it.
 
 ### Color and meaning
 
-| Use | Color treatment |
-| --- | --- |
-| Brand mark | White icon over a diagonal gradient from #4467e8 to #6d4ed3; 12 px radius |
-| Primary action/selection | Ant Design primary indigo; selected nav uses indigo text on #f0f2ff |
-| Violet metric | #6953d6 on #f0edff |
-| Blue metric | #4277dc on #eaf2ff |
-| Amber metric | #cc8b1d on #fff4df |
-| Green metric | #21966a on #e5f7ee |
-| API health | Green #2ab87f online, red #e05252 offline, neutral gray while checking |
-| Status tags | New neutral, Sourcing processing, Ready cyan, In transit blue, Delivered green, Cancelled red |
-| Customer type tags | Business geekblue; Individual purple |
+| Use                      | Color treatment                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| Brand mark               | White icon over a diagonal gradient from #4467e8 to #6d4ed3; 12 px radius                     |
+| Primary action/selection | Ant Design primary indigo; selected nav uses indigo text on #f0f2ff                           |
+| Violet metric            | #6953d6 on #f0edff                                                                            |
+| Blue metric              | #4277dc on #eaf2ff                                                                            |
+| Amber metric             | #cc8b1d on #fff4df                                                                            |
+| Green metric             | #21966a on #e5f7ee                                                                            |
+| API health               | Green #2ab87f online, red #e05252 offline, neutral gray while checking                        |
+| Status tags              | New neutral, Sourcing processing, Ready cyan, In transit blue, Delivered green, Cancelled red |
+| Customer type tags       | Business geekblue; Individual purple                                                          |
 
 Tables use compact 12 px body text, uppercase 10 px headers, and soft gray header backgrounds. Positive and negative roles are conveyed by both text labels and color. Primary actions use filled Ant Design buttons; row actions are text or small ghost buttons.
 
@@ -390,38 +390,38 @@ The print stylesheet creates one 100 mm × 60 mm white package label with 4 mm i
 
 Limits below combine current UI rules and API DTO validation. Server validation is authoritative. Monetary limits are whole numbers from 0 through 999,999,999,999 VND for order/item values and 1 through 999,999,999,999 VND for ledger entries.
 
-| Form/record | Field | Rule |
-| --- | --- | --- |
-| Customer | Type | Required: business or individual. |
-| Customer | Name | Required, trimmed, max 180 characters. |
-| Customer | Contact person | Optional, business-only in UI, max 180 characters. |
-| Customer | Tax ID | Optional, business-only in UI, max 40 characters. |
-| Customer | Email | Optional; valid email if supplied; max 180 characters; API stores lowercase. |
-| Customer | Phone | Optional, max 40 characters. |
-| Customer | Address | Optional, max 1,000 characters. |
-| Order | Type/customer | Required type (buy/transport) and valid customer UUID. |
-| Buy order | Item name | Required by API, trimmed, max 180 characters. |
-| Buy order | Quantity | Integer of at least 1. API permits multiple items; UI currently creates one. |
-| Buy order | Supplier | Optional, max 200 characters. |
-| Buy order | Unit cost | Integer VND, 0 through 999,999,999,999. |
-| Transport order | Cargo | Required, trimmed, max 2,000 characters. |
-| Order | Origin/destination | Optional, max 500 characters each. |
-| Order | Customer total/estimated cost | Optional integer VND, 0 through 999,999,999,999; UI initializes both to 0. |
-| Order | Notes | Optional, max 5,000 characters. |
-| Ledger | Type | Required one of the six ledger kinds listed in Core records. |
-| Ledger | Amount | Required positive integer VND, max 999,999,999,999. |
-| Ledger | Date | Required date; UI displays DD/MM/YYYY and posts ISO date. |
-| Ledger | Method/reference/notes | Optional; max 80 / 120 / 5,000 characters. |
-| Delivery update | Status | Required supported status enum. Note max 5,000; carrier/tracking max 200; origin/destination max 500. |
-| Warehouse location | Name/code | Required; max 180 / 60 characters; uniqueness is name + code; code is uppercased by API. |
-| Inventory item | SKU/name/unit | Required SKU and name, max 80 / 180; optional unit max 30, default each; SKU is uppercased and unique. |
-| Inventory item | Reorder level | Integer 0 through 1,000,000; UI default 0. |
-| Receipt/pick | Quantity | Integer 1 through 1,000,000; receipt may link a buy order; pick requires an order. |
-| Receipt/pick | Item/location/order | Valid UUIDs. Linked receipt must target a buy order; pick requires ready status and an assigned task. |
-| Staff | Email/role | Required valid email max 180; role is Operations, Warehouse, or Finance. |
-| Staff | Team/lead | Team optional; team lead boolean; team assignment required when lead is enabled. |
-| Staff | Temporary password | Required in local mode, at least 12 characters and at most 72 UTF-8 bytes. |
-| Team | Name | Required, trimmed, max 100 characters, duplicate names rejected. |
+| Form/record        | Field                         | Rule                                                                                                   |
+| ------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Customer           | Type                          | Required: business or individual.                                                                      |
+| Customer           | Name                          | Required, trimmed, max 180 characters.                                                                 |
+| Customer           | Contact person                | Optional, business-only in UI, max 180 characters.                                                     |
+| Customer           | Tax ID                        | Optional, business-only in UI, max 40 characters.                                                      |
+| Customer           | Email                         | Optional; valid email if supplied; max 180 characters; API stores lowercase.                           |
+| Customer           | Phone                         | Optional, max 40 characters.                                                                           |
+| Customer           | Address                       | Optional, max 1,000 characters.                                                                        |
+| Order              | Type/customer                 | Required type (buy/transport) and valid customer UUID.                                                 |
+| Buy order          | Item name                     | Required by API, trimmed, max 180 characters.                                                          |
+| Buy order          | Quantity                      | Integer of at least 1. API permits multiple items; UI currently creates one.                           |
+| Buy order          | Supplier                      | Optional, max 200 characters.                                                                          |
+| Buy order          | Unit cost                     | Integer VND, 0 through 999,999,999,999.                                                                |
+| Transport order    | Cargo                         | Required, trimmed, max 2,000 characters.                                                               |
+| Order              | Origin/destination            | Optional, max 500 characters each.                                                                     |
+| Order              | Customer total/estimated cost | Optional integer VND, 0 through 999,999,999,999; UI initializes both to 0.                             |
+| Order              | Notes                         | Optional, max 5,000 characters.                                                                        |
+| Ledger             | Type                          | Required one of the six ledger kinds listed in Core records.                                           |
+| Ledger             | Amount                        | Required positive integer VND, max 999,999,999,999.                                                    |
+| Ledger             | Date                          | Required date; UI displays DD/MM/YYYY and posts ISO date.                                              |
+| Ledger             | Method/reference/notes        | Optional; max 80 / 120 / 5,000 characters.                                                             |
+| Delivery update    | Status                        | Required supported status enum. Note max 5,000; carrier/tracking max 200; origin/destination max 500.  |
+| Warehouse location | Name/code                     | Required; max 180 / 60 characters; uniqueness is name + code; code is uppercased by API.               |
+| Inventory item     | SKU/name/unit                 | Required SKU and name, max 80 / 180; optional unit max 30, default each; SKU is uppercased and unique. |
+| Inventory item     | Reorder level                 | Integer 0 through 1,000,000; UI default 0.                                                             |
+| Receipt/pick       | Quantity                      | Integer 1 through 1,000,000; receipt may link a buy order; pick requires an order.                     |
+| Receipt/pick       | Item/location/order           | Valid UUIDs. Linked receipt must target a buy order; pick requires ready status and an assigned task.  |
+| Staff              | Email/role                    | Required valid email max 180; role is Operations, Warehouse, or Finance.                               |
+| Staff              | Team/lead                     | Team optional; team lead boolean; team assignment required when lead is enabled.                       |
+| Staff              | Temporary password            | Required in local mode, at least 12 characters and at most 72 UTF-8 bytes.                             |
+| Team               | Name                          | Required, trimmed, max 100 characters, duplicate names rejected.                                       |
 
 Dates shown in order details and order numbering use Asia/Ho_Chi_Minh. Finance currency formatting uses Vietnamese đồng with no displayed fractional digits. The API stores ledger/order numerics at two decimal places, while current forms accept integer VND values.
 
@@ -429,14 +429,14 @@ Dates shown in order details and order numbering use Asia/Ho_Chi_Minh. Finance c
 
 ### Order status behavior
 
-| Status | UI label | Initial or automatic behavior |
-| --- | --- | --- |
-| new | New | Initial status for transport orders. |
-| sourcing | Sourcing | Initial status for buy orders. |
-| ready | Ready to ship | A pick can be created only after the shipment reaches this status. |
-| in_transit | In transit | Applied automatically after all picks for a ready order are dispatched. |
-| delivered | Delivered | Can be recorded as a delivery update by allowed users. |
-| cancelled | Cancelled | Can be selected by Operations/Admin; no special cancellation workflow exists. |
+| Status     | UI label      | Initial or automatic behavior                                                 |
+| ---------- | ------------- | ----------------------------------------------------------------------------- |
+| new        | New           | Initial status for transport orders.                                          |
+| sourcing   | Sourcing      | Initial status for buy orders.                                                |
+| ready      | Ready to ship | A pick can be created only after the shipment reaches this status.            |
+| in_transit | In transit    | Applied automatically after all picks for a ready order are dispatched.       |
+| delivered  | Delivered     | Can be recorded as a delivery update by allowed users.                        |
+| cancelled  | Cancelled     | Can be selected by Operations/Admin; no special cancellation workflow exists. |
 
 Status updates append a delivery event and replace the order’s current status. The API validates enum membership but currently does not enforce a transition graph. It also does not restrict Ready to transport orders. Cancellation/reopening semantics therefore remain policy decisions.
 
@@ -467,36 +467,36 @@ Customer payments and vendor payouts are cash-flow measures; they are not subtra
 
 All application routes are under /api. Authenticated routes require a Harbor bearer token unless the development-only session guard is active. Request DTOs are transformed and unknown body fields are stripped by the global validation pipe.
 
-| Route | Method | Purpose and role scope |
-| --- | --- | --- |
-| /health | GET | API health check; public. |
-| /auth/session | POST | Exchange verified Firebase ID token for Harbor session. |
-| /auth/local/session | POST | Sign in with local email/password when local mode is enabled. |
-| /auth/me | GET | Return current session user. |
-| /auth/password | POST | Change local password; allowed during forced first sign-in. |
-| /dashboard | GET | Return role-scoped counts and recent work. |
-| /customers | GET | Search customers; Admin, Operations, Finance. |
-| /customers | POST | Create a customer; Admin, Operations. |
-| /customers/:id | PATCH | Update an owned customer or any customer as Admin. |
-| /orders | GET | Search/filter orders; Admin, Operations, Finance. |
-| /orders | POST | Create buy/transport order; Admin, Operations. |
-| /orders/:id | GET | Read scoped order details; Admin, Operations, Finance. |
-| /orders/:id/delivery-updates | POST | Update shipment state/details; Admin, Operations, Warehouse with ownership/assignment scope. |
-| /orders/:id/ledger | POST | Append ledger entry; Admin, Operations, Finance, with customer ownership enforcement. |
-| /finance | GET | Return scoped finance rows. |
-| /warehouse/assignees | GET | List warehouse staff eligible for assignment; Admin, Operations. |
-| /warehouse/tasks | GET | List warehouse task view models; Admin, Warehouse. |
-| /warehouse/lookup?code= | GET | Return authorized task details and movement history; Admin, Warehouse. |
-| /warehouse/locations | GET/POST | List or add shared locations; Admin, Warehouse. |
-| /warehouse/items | GET/POST | List or add shared inventory items; Admin, Warehouse. |
-| /warehouse/stock | GET | List stock by item/location; Admin, Warehouse. |
-| /warehouse/movements | GET | List recent role-scoped movement history; Admin, Warehouse. |
-| /warehouse/receipts | POST | Receive stock; Admin, Warehouse. Linked non-admin receipts require access to the warehouse task. |
-| /warehouse/picks | POST | Reserve available inventory for an assigned ready task; Admin, Warehouse. |
-| /warehouse/movements/:id/dispatch | POST | Dispatch a pending pick; Admin or task assignee. |
-| /teams | GET/POST | List/create teams; Admin. |
-| /staff | GET/POST | List/create staff; Admin. |
-| /staff/:id/temporary-password | POST | Set local temporary password and invalidate prior sessions; Admin in local auth mode. |
+| Route                             | Method   | Purpose and role scope                                                                           |
+| --------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| /health                           | GET      | API health check; public.                                                                        |
+| /auth/session                     | POST     | Exchange verified Firebase ID token for Harbor session.                                          |
+| /auth/local/session               | POST     | Sign in with local email/password when local mode is enabled.                                    |
+| /auth/me                          | GET      | Return current session user.                                                                     |
+| /auth/password                    | POST     | Change local password; allowed during forced first sign-in.                                      |
+| /dashboard                        | GET      | Return role-scoped counts and recent work.                                                       |
+| /customers                        | GET      | Search customers; Admin, Operations, Finance.                                                    |
+| /customers                        | POST     | Create a customer; Admin, Operations.                                                            |
+| /customers/:id                    | PATCH    | Update an owned customer or any customer as Admin.                                               |
+| /orders                           | GET      | Search/filter orders; Admin, Operations, Finance.                                                |
+| /orders                           | POST     | Create buy/transport order; Admin, Operations.                                                   |
+| /orders/:id                       | GET      | Read scoped order details; Admin, Operations, Finance.                                           |
+| /orders/:id/delivery-updates      | POST     | Update shipment state/details; Admin, Operations, Warehouse with ownership/assignment scope.     |
+| /orders/:id/ledger                | POST     | Append ledger entry; Admin, Operations, Finance, with customer ownership enforcement.            |
+| /finance                          | GET      | Return scoped finance rows.                                                                      |
+| /warehouse/assignees              | GET      | List warehouse staff eligible for assignment; Admin, Operations.                                 |
+| /warehouse/tasks                  | GET      | List warehouse task view models; Admin, Warehouse.                                               |
+| /warehouse/lookup?code=           | GET      | Return authorized task details and movement history; Admin, Warehouse.                           |
+| /warehouse/locations              | GET/POST | List or add shared locations; Admin, Warehouse.                                                  |
+| /warehouse/items                  | GET/POST | List or add shared inventory items; Admin, Warehouse.                                            |
+| /warehouse/stock                  | GET      | List stock by item/location; Admin, Warehouse.                                                   |
+| /warehouse/movements              | GET      | List recent role-scoped movement history; Admin, Warehouse.                                      |
+| /warehouse/receipts               | POST     | Receive stock; Admin, Warehouse. Linked non-admin receipts require access to the warehouse task. |
+| /warehouse/picks                  | POST     | Reserve available inventory for an assigned ready task; Admin, Warehouse.                        |
+| /warehouse/movements/:id/dispatch | POST     | Dispatch a pending pick; Admin or task assignee.                                                 |
+| /teams                            | GET/POST | List/create teams; Admin.                                                                        |
+| /staff                            | GET/POST | List/create staff; Admin.                                                                        |
+| /staff/:id/temporary-password     | POST     | Set local temporary password and invalidate prior sessions; Admin in local auth mode.            |
 
 Customer and order lists return all matching records in the current API implementation; pagination is applied in the browser. Dashboard recent orders are capped at eight. Warehouse task lists are not paginated; movement history is capped at 200 and task lookup activity at 100. Large installations may need server-side filtering and pagination.
 
@@ -515,17 +515,17 @@ The conceptual relationships are:
 
 ## 19. Product-level states and feedback
 
-| State | Current treatment |
-| --- | --- |
-| Initial app load | Centered Loading your workspace… message. |
-| Authenticated but API checking | Sidebar shows Checking API; then API connected or API unavailable. |
-| Table request pending | Ant Design table loading indicator; dashboard uses loading metric cards. |
-| Empty list | Ant Design empty state (No Data) or screen-specific guidance in Warehouse. |
-| Read failure | Inline error alert with retry on Dashboard, Customers, Orders, Logistics, Finance, Staff, and Warehouse. |
-| Save success | Brief Ant Design message, modal closes, list/detail refreshes. |
-| Save failure | Error message; the relevant modal/page remains available for correction/retry. |
-| Barcode not found/unauthorized | Dismissible warning; lookup result cleared; scan input regains focus. |
-| Unauthorized route/action | API returns role/record-scoped error; UI shows returned message where request is interactive. |
+| State                          | Current treatment                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Initial app load               | Centered Loading your workspace… message.                                                                |
+| Authenticated but API checking | Sidebar shows Checking API; then API connected or API unavailable.                                       |
+| Table request pending          | Ant Design table loading indicator; dashboard uses loading metric cards.                                 |
+| Empty list                     | Ant Design empty state (No Data) or screen-specific guidance in Warehouse.                               |
+| Read failure                   | Inline error alert with retry on Dashboard, Customers, Orders, Logistics, Finance, Staff, and Warehouse. |
+| Save success                   | Brief Ant Design message, modal closes, list/detail refreshes.                                           |
+| Save failure                   | Error message; the relevant modal/page remains available for correction/retry.                           |
+| Barcode not found/unauthorized | Dismissible warning; lookup result cleared; scan input regains focus.                                    |
+| Unauthorized route/action      | API returns role/record-scoped error; UI shows returned message where request is interactive.            |
 
 There is no global notification center, background polling for every table, or offline write queue. The health indicator polls the API every 30 seconds while a signed-in user is active and checks again when the browser window regains focus.
 
@@ -544,15 +544,15 @@ In addition to Section 9, these design-level details should be resolved before t
 
 ## 21. Source map
 
-| Product area | Primary implementation source |
-| --- | --- |
-| Application shell, navigation, Overview, Customers, Orders, Logistics, order detail, Finance, Staff access | web/src/App.tsx |
-| Warehouse lookup, stock, movement, item, location, receipt, pick, and dispatch screens | web/src/Warehouse.tsx |
-| Brand, palette, spacing, breakpoints, responsive behavior, and print label layout | web/src/styles.css |
-| Barcode generation and print content | web/src/OrderBarcode.tsx |
-| Authentication modes, login restoration, Firebase exchange, and password changes | web/src/AuthContext.tsx |
-| Frontend REST client and request error handling | web/src/api.ts |
-| API routes and request field validation | api/src/app.controller.ts |
-| Role scopes, calculations, order numbering, delivery, ledger, and warehouse transaction logic | api/src/app.service.ts |
-| Session verification, database entities, and schema migrations | api/src/session.guard.ts; api/src/entities; api/src/migrations |
-| Runtime settings and local services | docker-compose.yml; .env.example |
+| Product area                                                                                               | Primary implementation source                                  |
+| ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Application shell, navigation, Overview, Customers, Orders, Logistics, order detail, Finance, Staff access | web/src/App.tsx                                                |
+| Warehouse lookup, stock, movement, item, location, receipt, pick, and dispatch screens                     | web/src/Warehouse.tsx                                          |
+| Brand, palette, spacing, breakpoints, responsive behavior, and print label layout                          | web/src/styles.css                                             |
+| Barcode generation and print content                                                                       | web/src/OrderBarcode.tsx                                       |
+| Authentication modes, login restoration, Firebase exchange, and password changes                           | web/src/AuthContext.tsx                                        |
+| Frontend REST client and request error handling                                                            | web/src/api.ts                                                 |
+| API routes and request field validation                                                                    | api/src/app.controller.ts                                      |
+| Role scopes, calculations, order numbering, delivery, ledger, and warehouse transaction logic              | api/src/app.service.ts                                         |
+| Session verification, database entities, and schema migrations                                             | api/src/session.guard.ts; api/src/entities; api/src/migrations |
+| Runtime settings and local services                                                                        | docker-compose.yml; .env.example                               |

@@ -4,7 +4,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const origins = process.env.WEB_ORIGIN?.split(',').map((origin) => origin.trim()).filter(Boolean) ?? [];
+  const origins =
+    process.env.WEB_ORIGIN?.split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean) ?? [];
   if (process.env.NODE_ENV === 'production') {
     if (!origins.length) throw new Error('Set WEB_ORIGIN to the HTTPS origin of the production web app');
     for (const origin of origins) {

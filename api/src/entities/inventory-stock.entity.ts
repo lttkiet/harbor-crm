@@ -7,10 +7,12 @@ import { WarehouseLocation } from './warehouse-location.entity';
 export class InventoryStock {
   @PrimaryGeneratedColumn('uuid') id: string;
   @ManyToOne(() => InventoryItem, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'itemId' }) item: InventoryItem;
+  @JoinColumn({ name: 'itemId' })
+  item: InventoryItem;
   @Column('uuid') itemId: string;
   @ManyToOne(() => WarehouseLocation, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'locationId' }) location: WarehouseLocation;
+  @JoinColumn({ name: 'locationId' })
+  location: WarehouseLocation;
   @Column('uuid') locationId: string;
   @Column({ type: 'integer', default: 0 }) quantityOnHand: number;
   @Column({ type: 'integer', default: 0 }) quantityPicked: number;

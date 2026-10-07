@@ -7,7 +7,8 @@ export type LedgerKind = 'customer_charge' | 'customer_payment' | 'supplier_cost
 export class LedgerEntry {
   @PrimaryGeneratedColumn('uuid') id: string;
   @ManyToOne(() => Order, (order) => order.ledgerEntries, { onDelete: 'CASCADE' })
-  @JoinColumn() order: Order;
+  @JoinColumn()
+  order: Order;
   @Column('uuid') orderId: string;
   @Column({ type: 'varchar', length: 30 }) kind: LedgerKind;
   @Column({ type: 'numeric', precision: 14, scale: 2 }) amount: string;

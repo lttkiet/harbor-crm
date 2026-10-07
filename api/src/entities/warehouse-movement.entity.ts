@@ -11,13 +11,16 @@ export class WarehouseMovement {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ type: 'varchar', length: 16 }) type: WarehouseMovementType;
   @ManyToOne(() => InventoryItem, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'itemId' }) item: InventoryItem;
+  @JoinColumn({ name: 'itemId' })
+  item: InventoryItem;
   @Column('uuid') itemId: string;
   @ManyToOne(() => WarehouseLocation, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'locationId' }) location: WarehouseLocation;
+  @JoinColumn({ name: 'locationId' })
+  location: WarehouseLocation;
   @Column('uuid') locationId: string;
   @ManyToOne(() => Order, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'orderId' }) order: Order | null;
+  @JoinColumn({ name: 'orderId' })
+  order: Order | null;
   @Column({ type: 'uuid', nullable: true }) orderId: string | null;
   @Column({ type: 'uuid', nullable: true }) sourceMovementId: string | null;
   @Column({ type: 'integer' }) quantity: number;

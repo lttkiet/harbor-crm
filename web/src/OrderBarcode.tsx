@@ -16,18 +16,25 @@ function BarcodeSvg({ value, className }: { value: string; className?: string })
 
 export default function OrderBarcode({ orderNumber, type }: { orderNumber: string; type: 'buy' | 'transport' }) {
   const labelType = type === 'buy' ? 'BUY ORDER' : 'TRANSPORT ORDER';
-  return <div className="order-barcode">
-    <div className="order-barcode-preview">
-      <Text type="secondary">Package barcode</Text>
-      <BarcodeSvg value={orderNumber} />
-      <strong>{orderNumber}</strong>
+  return (
+    <div className="order-barcode">
+      <div className="order-barcode-preview">
+        <Text type="secondary">Package barcode</Text>
+        <BarcodeSvg value={orderNumber} />
+        <strong>{orderNumber}</strong>
+      </div>
+      <Button icon={<PrinterOutlined />} onClick={() => window.print()}>
+        Print package label
+      </Button>
+      {createPortal(
+        <div id="package-label-print" aria-hidden="true">
+          <strong className="package-label-brand">HARBOR</strong>
+          <span className="package-label-type">{labelType}</span>
+          <BarcodeSvg value={orderNumber} className="package-label-code" />
+          <strong className="package-label-id">{orderNumber}</strong>
+        </div>,
+        document.body,
+      )}
     </div>
-    <Button icon={<PrinterOutlined />} onClick={() => window.print()}>Print package label</Button>
-    {createPortal(<div id="package-label-print" aria-hidden="true">
-      <strong className="package-label-brand">HARBOR</strong>
-      <span className="package-label-type">{labelType}</span>
-      <BarcodeSvg value={orderNumber} className="package-label-code" />
-      <strong className="package-label-id">{orderNumber}</strong>
-    </div>, document.body)}
-  </div>;
+  );
 }

@@ -1,13 +1,31 @@
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ArrayMinSize, IsArray, IsBoolean, IsDateString, IsEmail, IsIn, IsInt, IsNotEmpty, IsObject, IsOptional, IsString, IsUUID, Max, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsEmail,
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { AppService } from './app.service';
 import { SessionGuard } from './session.guard';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 
-const trimOptional = ({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() || null : value;
-const trimRequired = ({ value }: { value: unknown }) => typeof value === 'string' ? value.trim() : value;
+const trimOptional = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() || null : value);
+const trimRequired = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 const MAX_VND = 999_999_999_999;
 
 class CustomerInput {
@@ -42,7 +60,8 @@ class OrderItemInput {
 }
 
 class LedgerInput {
-  @IsIn(['customer_charge', 'customer_payment', 'supplier_cost', 'supplier_payment', 'carrier_cost', 'carrier_payment']) kind: 'customer_charge' | 'customer_payment' | 'supplier_cost' | 'supplier_payment' | 'carrier_cost' | 'carrier_payment';
+  @IsIn(['customer_charge', 'customer_payment', 'supplier_cost', 'supplier_payment', 'carrier_cost', 'carrier_payment']) kind:
+    'customer_charge' | 'customer_payment' | 'supplier_cost' | 'supplier_payment' | 'carrier_cost' | 'carrier_payment';
   @IsInt() @Min(1) @Max(MAX_VND) amount: number;
   @Transform(trimOptional) @IsOptional() @IsString() @MaxLength(80) method?: string;
   @Transform(trimOptional) @IsOptional() @IsString() @MaxLength(120) reference?: string;
@@ -101,7 +120,9 @@ class StaffInput {
   @IsOptional() @IsString() @MaxLength(72) temporaryPassword?: string;
 }
 
-class TeamInput { @Transform(trimRequired) @IsString() @IsNotEmpty() @MaxLength(100) name: string; }
+class TeamInput {
+  @Transform(trimRequired) @IsString() @IsNotEmpty() @MaxLength(100) name: string;
+}
 
 class SessionInput {
   @IsString() @IsNotEmpty() @MaxLength(5000) idToken: string;
@@ -130,22 +151,32 @@ export class AppController {
 
   @Post('auth/session')
   @HttpCode(200)
-  createSession(@Body() body: SessionInput) { return this.service.createSession(body.idToken); }
+  createSession(@Body() body: SessionInput) {
+    return this.service.createSession(body.idToken);
+  }
 
   @Post('auth/local/session')
   @HttpCode(200)
-  localSession(@Body() body: LocalSessionInput) { return this.service.localSession(body.email, body.password); }
+  localSession(@Body() body: LocalSessionInput) {
+    return this.service.localSession(body.email, body.password);
+  }
 
   @UseGuards(SessionGuard)
   @Get('auth/me')
-  currentSession(@Req() req: any) { return { user: req.user }; }
+  currentSession(@Req() req: any) {
+    return { user: req.user };
+  }
 
   @UseGuards(SessionGuard)
   @Post('auth/password')
-  changePassword(@Body() body: PasswordChangeInput, @Req() req: any) { return this.service.changePassword(req.user, body.currentPassword, body.newPassword); }
+  changePassword(@Body() body: PasswordChangeInput, @Req() req: any) {
+    return this.service.changePassword(req.user, body.currentPassword, body.newPassword);
+  }
 
   @Get('health')
-  health() { return { status: 'ok' }; }
+  health() {
+    return { status: 'ok' };
+  }
 
   @Get('ready')
   async ready() {
@@ -155,7 +186,9 @@ export class AppController {
 
   @UseGuards(SessionGuard)
   @Get('dashboard')
-  dashboard(@Req() req: any) { return this.service.dashboard(req.user); }
+  dashboard(@Req() req: any) {
+    return this.service.dashboard(req.user);
+  }
 
   @UseGuards(SessionGuard)
   @Get('customers')

@@ -18,9 +18,9 @@ substitutions:
   _IMAGE: asia-southeast1-docker.pkg.dev/example-project/harbor-crm/web:manual
   _VITE_API_URL: https://api.example.invalid/api
   _VITE_AUTH_MODE: firebase
-  _VITE_FIREBASE_API_KEY: ""
-  _VITE_FIREBASE_AUTH_DOMAIN: ""
-  _VITE_FIREBASE_PROJECT_ID: ""
-  _VITE_FIREBASE_APP_ID: ""
+  _VITE_FIREBASE_API_KEY: ''
+  _VITE_FIREBASE_AUTH_DOMAIN: ''
+  _VITE_FIREBASE_PROJECT_ID: ''
+  _VITE_FIREBASE_APP_ID: ''
 options:
   logging: CLOUD_LOGGING_ONLY
