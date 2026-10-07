@@ -362,10 +362,12 @@ function Logistics({ user, notify }: { user: { id: string; role: Role }; notify:
     if (!['admin', 'operations'].includes(user.role)) return;
     api.warehouseAssignees().then(setAssignees).catch((error) => notify(errorText(error, 'Could not load warehouse staff'), 'error'));
   }, [user.role]);
-  const visibleRows = status === 'all' ? rows : rows.filter((row) => row.status === status);
-  const readyCount = rows.filter((row) => row.status === 'ready').length;
-  const transitCount = rows.filter((row) => row.status === 'in_transit').length;
-  const deliveredCount = rows.filter((row) => row.status === 'delivered').length;
+    // ⚡ Bolt: Memoize filtered rows to prevent unnecessary recalculation on render
+  const visibleRows = useMemo(() => status === 'all' ? rows : rows.filter((row) => row.status === status), [status, rows]);
+    // ⚡ Bolt: Memoize status counts to prevent unnecessary array iterations on render
+  const readyCount = useMemo(() => rows.filter((row) => row.status === 'ready').length, [rows]);
+  const transitCount = useMemo(() => rows.filter((row) => row.status === 'in_transit').length, [rows]);
+  const deliveredCount = useMemo(() => rows.filter((row) => row.status === 'delivered').length, [rows]);
 
   async function openDetails(row: Order | WarehouseTask) {
     if (user.role === 'warehouse') return;
