@@ -29,10 +29,8 @@ export default function Warehouse({ user, notify }: { user: Pick<Staff, 'id' | '
   const [form] = Form.useForm();
   const isAdmin = user.role === 'admin';
   const mutableTasks = useMemo(() => tasks.filter((task) => isAdmin || task.warehouseStaffId === user.id), [isAdmin, tasks, user.id]);
-    // ⚡ Bolt: Memoize filtered tasks to prevent unnecessary recalculation on render
   const receiptTasks = useMemo(() => mutableTasks.filter((task) => task.type === 'buy'), [mutableTasks]);
   const pickTasks = useMemo(() => mutableTasks.filter((task) => task.status === 'ready'), [mutableTasks]);
-    // ⚡ Bolt: Memoize aggregate calculations to prevent unnecessary array iterations on render
   const availableUnits = useMemo(() => stock.reduce((sum, row) => sum + Math.max(0, row.quantityOnHand - row.quantityPicked), 0), [stock]);
   const lowStock = useMemo(() => stock.filter((row) => row.quantityOnHand - row.quantityPicked <= row.item.reorderLevel).length, [stock]);
 
