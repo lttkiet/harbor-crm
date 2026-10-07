@@ -208,7 +208,7 @@ function Customers({ user, notify }: { user: { id: string; role: Role }; notify:
     catch (error) { if (requestId === loadRequest.current) { setRows([]); setLoadError(errorText(error, 'Could not load customers')); } }
     finally { if (requestId === loadRequest.current) setLoading(false); }
   }
-  useEffect(() => { void load(); return () => { loadRequest.current += 1; }; }, [search]);
+  useEffect(() => { const timer = setTimeout(() => void load(), 300); return () => { clearTimeout(timer); loadRequest.current += 1; }; }, [search]);
   async function submit(values: any) {
     setBusy(true);
     try { if (editing) { await api.updateCustomer(editing.id, values); notify('Customer updated'); } else { await api.createCustomer(values); notify('Customer added'); } setOpen(false); setEditing(null); form.resetFields(); await load(); }
@@ -349,23 +349,24 @@ function Logistics({ user, notify }: { user: { id: string; role: Role }; notify:
     setLoading(true); setLoadError('');
     try {
       const result = user.role === 'warehouse' ? await api.warehouseTasks() : await api.orders({ search });
-      const filtered = user.role === 'warehouse' && search.trim()
-        ? result.filter((row) => [row.orderNumber, row.origin, row.destination, row.cargoDescription, ...row.items.map((item) => item.name)].some((value) => value?.toLowerCase().includes(search.trim().toLowerCase())))
+      const searchLower = search.trim().toLowerCase();
+      const filtered = user.role === 'warehouse' && searchLower
+        ? result.filter((row) => row.orderNumber?.toLowerCase().includes(searchLower) || row.origin?.toLowerCase().includes(searchLower) || row.destination?.toLowerCase().includes(searchLower) || row.cargoDescription?.toLowerCase().includes(searchLower) || row.items?.some((item) => item.name?.toLowerCase().includes(searchLower)))
         : result;
       if (requestId === loadRequest.current) setRows(filtered);
     }
     catch (error) { if (requestId === loadRequest.current) { setRows([]); setLoadError(errorText(error, 'Could not load shipments')); } }
     finally { if (requestId === loadRequest.current) setLoading(false); }
   }
-  useEffect(() => { void load(); return () => { loadRequest.current += 1; }; }, [search]);
+  useEffect(() => { const timer = setTimeout(() => void load(), 300); return () => { clearTimeout(timer); loadRequest.current += 1; }; }, [search]);
   useEffect(() => {
     if (!['admin', 'operations'].includes(user.role)) return;
     api.warehouseAssignees().then(setAssignees).catch((error) => notify(errorText(error, 'Could not load warehouse staff'), 'error'));
   }, [user.role]);
-  const visibleRows = status === 'all' ? rows : rows.filter((row) => row.status === status);
-  const readyCount = rows.filter((row) => row.status === 'ready').length;
-  const transitCount = rows.filter((row) => row.status === 'in_transit').length;
-  const deliveredCount = rows.filter((row) => row.status === 'delivered').length;
+  const visibleRows = useMemo(() => status === 'all' ? rows : rows.filter((row) => row.status === status), [status, rows]);
+  const readyCount = useMemo(() => rows.filter((row) => row.status === 'ready').length, [rows]);
+  const transitCount = useMemo(() => rows.filter((row) => row.status === 'in_transit').length, [rows]);
+  const deliveredCount = useMemo(() => rows.filter((row) => row.status === 'delivered').length, [rows]);
 
   async function openDetails(row: Order | WarehouseTask) {
     if (user.role === 'warehouse') return;
