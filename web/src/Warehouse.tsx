@@ -29,10 +29,10 @@ export default function Warehouse({ user, notify }: { user: Pick<Staff, 'id' | '
   const [form] = Form.useForm();
   const isAdmin = user.role === 'admin';
   const mutableTasks = useMemo(() => tasks.filter((task) => isAdmin || task.warehouseStaffId === user.id), [isAdmin, tasks, user.id]);
-  const receiptTasks = mutableTasks.filter((task) => task.type === 'buy');
-  const pickTasks = mutableTasks.filter((task) => task.status === 'ready');
-  const availableUnits = stock.reduce((sum, row) => sum + Math.max(0, row.quantityOnHand - row.quantityPicked), 0);
-  const lowStock = stock.filter((row) => row.quantityOnHand - row.quantityPicked <= row.item.reorderLevel).length;
+  const receiptTasks = useMemo(() => mutableTasks.filter((task) => task.type === 'buy'), [mutableTasks]);
+  const pickTasks = useMemo(() => mutableTasks.filter((task) => task.status === 'ready'), [mutableTasks]);
+  const availableUnits = useMemo(() => stock.reduce((sum, row) => sum + Math.max(0, row.quantityOnHand - row.quantityPicked), 0), [stock]);
+  const lowStock = useMemo(() => stock.filter((row) => row.quantityOnHand - row.quantityPicked <= row.item.reorderLevel).length, [stock]);
 
   async function refreshLookup() {
     const code = lookup?.task.orderNumber;
