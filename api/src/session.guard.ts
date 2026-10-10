@@ -24,7 +24,8 @@ export class SessionGuard implements CanActivate {
       request.user = { sub: staff.id, id: staff.id, email: staff.email, role: staff.role, teamId: staff.teamId, isTeamLead: staff.isTeamLead, mustChangePassword: staff.mustChangePassword };
       if (staff.mustChangePassword && !request.path.endsWith('/auth/password') && !request.path.endsWith('/auth/me')) throw new UnauthorizedException('Change your temporary password before continuing');
       return true;
-    } catch {
+    } catch (e) {
+      if (e instanceof UnauthorizedException) throw e;
       throw new UnauthorizedException('Session expired');
     }
   }
